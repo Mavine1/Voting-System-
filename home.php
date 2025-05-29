@@ -174,7 +174,7 @@
                                                                     <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #1e40af; border-radius: 5px 0 0 5px; padding: 12px 18px; font-size: 16px; color: #1e40af; transition: border-color 0.3s ease;" 
                                                                         data-position="<?php echo $row['id']; ?>" data-slug="<?php echo $slug; ?>" data-max-vote="<?php echo $row['max_vote']; ?>">
                                                                     <span class="input-group-btn">
-                                                                        <button class="btn btn-primary search-btn" type="button" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 0 5px 5px 0; padding: 12px 24px; font-size: 12px; font-family: Times;">
+                                                                        <button class="btn btn-primary search-btn" type="button" style="background-color: ; border-color: #1e40af; color: #ffffff; border-radius: 0 5px 5px 0; padding: 12px 24px; font-size: 12px; font-family: Times;">
                                                                             Search
                                                                         </button>
                                                                     </span>
@@ -321,7 +321,7 @@ $(function() {
                                     <p style="color: #1e40af; font-size: 14px; line-height: 1.4; font-family: Times;">${platform.substring(0,100)}${platform.length > 100 ? '...' : ''}</p>
                                 </div>
                                 <div class="col-md-3 text-center">
-                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #1e40af; border-color: #1e40af; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
+                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #008000; border-color: #1e40af; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
                                 </div>
                             </div>
                         </div>`;
