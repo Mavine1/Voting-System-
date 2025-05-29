@@ -163,7 +163,7 @@ $(function() {
     // Auto-fade visible alerts after 20s
     function autoFadeAlerts() {
         $('.floating-alert:visible').each(function() {
-            setTimeout(() => $(this).fadeOut(1000), 20000);
+            setTimeout(() => $(this).fadeOut(1000), 4000);
         });
     }
     autoFadeAlerts();
@@ -181,7 +181,7 @@ $(function() {
         // Clear any existing timeout to prevent conflicts
         clearTimeout($(alertId).data('fadeTimeout'));
         // Set fade out after 20 seconds
-        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 20000);
+        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 4000);
         $(alertId).data('fadeTimeout', timeout);
     }
 
