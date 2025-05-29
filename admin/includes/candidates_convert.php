@@ -6,12 +6,18 @@ $response = ['success' => false];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $position_id = intval($_POST['position']);
-    $platform = $conn->real_escape_string($_POST['platform']);
+    $platform = isset($_POST['platform']) ? $conn->real_escape_string($_POST['platform']) : '';
     $add_all = isset($_POST['convert_all']) && $_POST['convert_all'] == '1';
     $selected_voters = isset($_POST['voters']) ? $_POST['voters'] : '';
 
     if (!$position_id) {
         $response['error'] = 'Please select a position.';
+        echo json_encode($response);
+        exit;
+    }
+
+    if (empty($platform)) {
+        $response['error'] = 'Please enter a platform description.';
         echo json_encode($response);
         exit;
     }
