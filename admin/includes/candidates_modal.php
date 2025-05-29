@@ -84,28 +84,97 @@
     </div>
 </div>
 <!-- Convert Voters Modal -->
+<!-- Convert Voters Modal -->
+<div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <form id="convertVoterForm" method="POST" action="candidates_add.php">
+      <div class="modal-content" style="background-color: #d8d1bd; color: black; font-size: 15px; font-family: Times;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="convertVotersLabel">Convert Voters to Candidates</h5>
+          <button type="button" class="close btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
 
+        <div class="modal-body">
+          <!-- Search Voters -->
+          <div class="form-group">
+            <label for="voterSearch">Search Voters by Name</label>
+            <input type="text" id="voterSearch" class="form-control" placeholder="Enter first or last name...">
+            <small class="form-text text-muted">Type at least 2 characters to search.</small>
+          </div>
 
+          <!-- Search Results -->
+          <div id="voterSearchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+            <!-- Search results will be injected here -->
+          </div>
+
+          <hr>
+
+          <!-- Position Selection -->
+          <div class="form-group">
+            <label for="positionSelect">Select Position</label>
+            <select id="positionSelect" name="position" class="form-control" required>
+              <option value="">-- Select Position --</option>
+              <?php
+                $posSql = "SELECT * FROM positions ORDER BY priority ASC";
+                $posQuery = $conn->query($posSql);
+                while($pos = $posQuery->fetch_assoc()) {
+                  echo "<option value='" . htmlspecialchars($pos['id']) . "'>" . htmlspecialchars($pos['description']) . "</option>";
+                }
+              ?>
+            </select>
+          </div>
+
+          <!-- Platform Description -->
+          <div class="form-group">
+            <label for="platformDesc">Platform Description</label>
+            <textarea id="platformDesc" name="platform" class="form-control" rows="4" placeholder="Enter platform description" required></textarea>
+          </div>
+
+          <!-- Add All Voters Checkbox -->
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="addAllVoters" name="add_all_voters">
+              Add <strong>ALL</strong> voters as candidates (ignore search/select)
+            </label>
+          </div>
+
+          <!-- Hidden input to store selected voter IDs -->
+          <input type="hidden" name="selected_voters" id="selectedVotersInput" value="">
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Convert to Candidates</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JQuery and JS -->
 <script>
-$(document).ready(function(){
+$(document).ready(function() {
   let selectedVoters = new Set();
 
-  // Debounce helper to limit AJAX calls while typing
+  // Debounce function to limit search calls
   function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function() {
+      const context = this, args = arguments;
       clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
+      timeout = setTimeout(() => func.apply(context, args), wait);
     };
   }
 
-  // Update hidden input with selected voters as CSV
+  // Update hidden input with selected voters CSV
   function updateSelectedVotersInput() {
     $('#selectedVotersInput').val(Array.from(selectedVoters).join(','));
   }
 
-  // Render voter search results
-  function renderVoterResults(voters) {
+  // Render voters search results inside modal
+  function renderVoters(voters) {
     const container = $('#voterSearchResults');
     container.empty();
 
@@ -115,22 +184,22 @@ $(document).ready(function(){
     }
 
     voters.forEach(voter => {
-      const checked = selectedVoters.has(voter.id.toString()) ? 'checked' : '';
-      const photoUrl = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
+      const isChecked = selectedVoters.has(voter.id.toString()) ? 'checked' : '';
+      const photo = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
 
-      const voterHtml = `
+      container.append(`
         <div class="form-check" style="padding: 5px 0; border-bottom: 1px solid #eee;">
-          <input class="form-check-input voter-checkbox" type="checkbox" value="${voter.id}" id="voter_${voter.id}" ${checked}>
+          <input class="form-check-input voter-checkbox" type="checkbox" id="voter_${voter.id}" value="${voter.id}" ${isChecked}>
           <label class="form-check-label" for="voter_${voter.id}">
-            <img src="${photoUrl}" alt="Photo" style="height:30px; width:30px; border-radius:50%; object-fit:cover; margin-right:8px;">
+            <img src="${photo}" alt="Photo" style="height:30px; width:30px; border-radius:50%; object-fit:cover; margin-right:8px;">
             ${voter.firstname} ${voter.lastname}
           </label>
-        </div>`;
-      container.append(voterHtml);
+        </div>
+      `);
     });
   }
 
-  // AJAX search function
+  // AJAX call to search voters by name
   const ajaxSearchVoters = debounce(function() {
     const query = $('#voterSearch').val().trim();
 
@@ -140,12 +209,12 @@ $(document).ready(function(){
     }
 
     $.ajax({
-      url: 'search_voters.php',  // Your PHP search endpoint
-      type: 'POST',
+      url: 'search_voters.php', // Your backend PHP search handler
+      method: 'POST',
       dataType: 'json',
       data: { search: query },
       success: function(data) {
-        renderVoterResults(data);
+        renderVoters(data);
       },
       error: function() {
         $('#voterSearchResults').html('<p class="text-danger">Search failed. Please try again.</p>');
@@ -153,17 +222,16 @@ $(document).ready(function(){
     });
   }, 300);
 
-  // Bind input event to search box
+  // Search input keyup event
   $('#voterSearch').on('input', function() {
     if ($('#addAllVoters').is(':checked')) {
-      // Disable search when adding all voters
       $('#voterSearchResults').empty();
       return;
     }
     ajaxSearchVoters();
   });
 
-  // Toggle all voters checkbox disables search & selection
+  // Handle "Add All Voters" checkbox toggle
   $('#addAllVoters').change(function() {
     if ($(this).is(':checked')) {
       $('#voterSearch').prop('disabled', true);
@@ -175,7 +243,7 @@ $(document).ready(function(){
     }
   });
 
-  // Handle selection/deselection of voters in search results
+  // Track checkbox changes inside search results
   $('#voterSearchResults').on('change', '.voter-checkbox', function() {
     const voterId = $(this).val();
     if ($(this).is(':checked')) {
@@ -186,8 +254,8 @@ $(document).ready(function(){
     updateSelectedVotersInput();
   });
 
-  // Optional: clear selections when modal closes
-  $('#convertVoters').on('hidden.bs.modal', function () {
+  // Reset modal when closed
+  $('#convertVoters').on('hidden.bs.modal', function() {
     selectedVoters.clear();
     updateSelectedVotersInput();
     $('#voterSearch').val('').prop('disabled', false);
