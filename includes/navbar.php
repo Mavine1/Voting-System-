@@ -3,11 +3,9 @@
     <div class="container" style="background-color: #1e40af;">
       <div class="navbar-header" style="background-color: #1e40af;">
         <a href="#" class="navbar-brand" style="background-color: #1e40af; color: #ffffff; font-size: 22px; font-family: Times; text-decoration: none;">
-          <b>ONLINE <b>VOTING</b> SYSTEM</b>
+          <b>Text <b>Book</b> Centre</b>
         </a>
-        <button type="button" class="navbar-toggle collapsed" style="background-color: #1e40af; border: 2px solid #ffffff;" data-toggle="collapse" data-target="#navbar-collapse">
-          <i class="fa fa-bars" style="color: #ffffff;"></i>
-        </button>
+
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
