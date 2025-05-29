@@ -83,7 +83,6 @@
         </div>
     </div>
 </div>
-<!---convert----!-->
 <!-- Convert Voters Modal -->
 <div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -139,7 +138,6 @@
     </form>
   </div>
 </div>
-
 
 <!-- Edit -->
 <div class="modal fade" id="edit">
