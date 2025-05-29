@@ -54,7 +54,7 @@
                     <label for="position_filter" style="color: #1e40af; font-size: 14px; font-weight: 600; margin-bottom: 8px; display: block;">
                       <i class="fa fa-filter" style="margin-right: 8px;"></i>Filter by Position:
                     </label>
-                    <select id="position_filter" class="form-control" style="width: 250px; border: 2px solid #3b82f6; border-radius: 8px; padding: 10px; font-size: 14px; background: white;">
+                    <select id="position_filter" class="form-control" style="width: 250px; border: 2px solid #3b82f6; border-radius: 8px; padding: 7px; font-size: 14px; background: white;">
                       <option value="">All Positions</option>
                       <?php
                         $pos_sql = "SELECT * FROM positions ORDER BY priority ASC";
