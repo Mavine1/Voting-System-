@@ -3,149 +3,141 @@
 <body class="hold-transition skin-blue layout-top-nav">
 <div class="wrapper">
 
-	<?php include 'includes/navbar.php'; ?>
-	 
-	  <div class="content-wrapper" style="background-color: #ffffff">
-	    <div class="container" style="background-color: #ffffff">
+    <?php include 'includes/navbar.php'; ?>
+     
+    <div class="content-wrapper" style="background-color: #ffffff">
+        <div class="container" style="background-color: #ffffff">
 
-	      <!-- Main content -->
-	      <section class="content">
-	      	<?php
-	      		$parse = parse_ini_file('admin/config.ini', FALSE, INI_SCANNER_RAW);
-    			$title = $parse['election_title'];
-	      	?>
-	      	<h1 class="page-header text-center title" style="color: #2c5aa0;"><b><?php echo strtoupper($title); ?></b></h1>
-	        <div class="row">
-	        	<div class="col-sm-10 col-sm-offset-1">
-	        		<?php
-				        if(isset($_SESSION['error'])){
-				        	?>
-				        	<div class="alert alert-danger alert-dismissible floating-alert" id="error-alert">
-				        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-					        	<ul>
-					        		<?php
-					        			foreach($_SESSION['error'] as $error){
-					        				echo "
-					        					<li>".$error."</li>
-					        				";
-					        			}
-					        		?>
-					        	</ul>
-					        </div>
-				        	<?php
-				         	unset($_SESSION['error']);
+            <!-- Main content -->
+            <section class="content">
+                <?php
+                    $parse = parse_ini_file('admin/config.ini', FALSE, INI_SCANNER_RAW);
+                    $title = $parse['election_title'];
+                ?>
+                <h1 class="page-header text-center title" style="color: #2c5aa0;"><b><?php echo strtoupper($title); ?></b></h1>
+                <div class="row">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <?php
+                            if(isset($_SESSION['error'])){
+                                ?>
+                                <div class="alert alert-danger alert-dismissible floating-alert" id="error-alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    <ul>
+                                        <?php
+                                            foreach($_SESSION['error'] as $error){
+                                                echo "
+                                                    <li>".$error."</li>
+                                                ";
+                                            }
+                                        ?>
+                                    </ul>
+                                </div>
+                                <?php
+                                unset($_SESSION['error']);
+                            }
+                            if(isset($_SESSION['success'])){
+                                echo "
+                                    <div class='alert alert-success alert-dismissible floating-alert' id='success-alert'>
+                                        <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+                                        <h4><i class='icon fa fa-check'></i> Success!</h4>
+                                        ".$_SESSION['success']."
+                                    </div>
+                                ";
+                                unset($_SESSION['success']);
+                            }
+                        ?>
+    
+                        <div class="alert alert-danger alert-dismissible floating-alert" id="alert" style="display:none;">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <span class="message"></span>
+                        </div>
 
-				        }
-				        if(isset($_SESSION['success'])){
-				          	echo "
-				            	<div class='alert alert-success alert-dismissible floating-alert' id='success-alert'>
-				              		<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
-				              		<h4><i class='icon fa fa-check'></i> Success!</h4>
-				              	".$_SESSION['success']."
-				            	</div>
-				          	";
-				          	unset($_SESSION['success']);
-				        }
+                        <div class="alert alert-info alert-dismissible floating-alert" id="info-alert" style="display:none;">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <span class="info-message"></span>
+                        </div>
 
-				    ?>
- 
-				    <div class="alert alert-danger alert-dismissible floating-alert" id="alert" style="display:none;">
-		        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-			        	<span class="message"></span>
-			        </div>
+                        <?php
+                            $sql = "SELECT * FROM votes WHERE voters_id = '".$voter['id']."'";
+                            $vquery = $conn->query($sql);
+                            if($vquery->num_rows > 0){
+                                ?>
+                                <div class="text-center" style="color: #2c5aa0; font-size: 35px; font-family: Arial, sans-serif;">
+                                    <h3>You have already voted for this election.</h3>
+                                    <a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #4a90e2; border-color: #4a90e2; color: white; font-size: 22px; font-family: Arial, sans-serif;">View Ballot</a>
+                                </div>
+                                <?php
+                            }
+                            else{
+                                ?>
+                                <!-- Voting Ballot -->
+                                <form method="POST" id="ballotForm" action="submit_ballot.php">
+                                    <?php
+                                        include 'includes/slugify.php';
 
-			        <div class="alert alert-info alert-dismissible floating-alert" id="info-alert" style="display:none;">
-		        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-			        	<span class="info-message"></span>
-			        </div>
+                                        $sql = "SELECT * FROM positions ORDER BY priority ASC";
+                                        $query = $conn->query($sql);
+                                        while($row = $query->fetch_assoc()){
+                                            $slug = slugify($row['description']);
+                                            $instruct = ($row['max_vote'] > 1) ? 'You may select up to '.$row['max_vote'].' candidates' : 'Select only one candidate';
 
-				    <?php
-				    	$sql = "SELECT * FROM votes WHERE voters_id = '".$voter['id']."'";
-				    	$vquery = $conn->query($sql);
-				    	if($vquery->num_rows > 0){
-				    		?>
-				    		<div class="text-center" style="color: #2c5aa0; font-size: 35px; font-family: Arial, sans-serif;">
-					    		<h3>You have already voted for this election.</h3>
-					    		<a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #4a90e2; border-color: #4a90e2; color: white; font-size: 22px; font-family: Arial, sans-serif;">View Ballot</a>
-					    	</div>
-				    		<?php
-				    	}
-				    	else{
-				    		?>
-			    			<!-- Voting Ballot -->
-						    <form method="POST" id="ballotForm" action="submit_ballot.php">
-				        		<?php
-				        			include 'includes/slugify.php';
-
-				        			$sql = "SELECT * FROM positions ORDER BY priority ASC";
-									$query = $conn->query($sql);
-									while($row = $query->fetch_assoc()){
-										$slug = slugify($row['description']);
-										$instruct = ($row['max_vote'] > 1) ? 'You may select up to '.$row['max_vote'].' candidates' : 'Select only one candidate';
-
-										echo '
-											<div class="row">
-												<div class="col-xs-12">
-													<div class="box" style="background-color: #f8f9fa; border: 2px solid #e3f2fd; border-radius: 8px; margin-bottom: 20px;" id="'.$row['id'].'">
-														<div class="box-header with-border" style="background-color: #e3f2fd; border-radius: 6px 6px 0 0;">
-															<h3 class="box-title" style="color: #2c5aa0; font-weight: bold;">'.$row['description'].'</h3>
-														</div>
-														<div class="box-body" style="padding: 20px;">
-															<p style="color: #333; margin-bottom: 15px;">'.$instruct.'
-																<span class="pull-right">
-																	<button type="button" class="btn btn-warning btn-sm reset" style="background-color: #ffc107; border-color: #ffc107; color: #333; border-radius: 20px;" data-desc="'.$slug.'"><i class="fa fa-refresh"></i> Reset</button>
-																</span>
-															</p>
-															
-															<!-- Search Input -->
-															<div class="search-container" style="margin-bottom: 20px;">
-																<div class="input-group">
-																	<input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #4a90e2; border-radius: 25px 0 0 25px; padding: 10px 15px;" data-position="'.$row['id'].'" data-slug="'.$slug.'" data-max-vote="'.$row['max_vote'].'">
-																	<span class="input-group-btn">
-																		<button class="btn btn-primary" type="button" style="background-color: #4a90e2; border-color: #4a90e2; border-radius: 0 25px 25px 0; padding: 10px 20px;"><i class="fa fa-search"></i></button>
-																	</span>
-																</div>
-															</div>
-															
-															<!-- Search Results -->
-															<div class="search-results" id="results_'.$row['id'].'" style="display: none;">
-																<h5 style="color: #2c5aa0; margin-bottom: 15px;">Search Results:</h5>
-																<div class="candidates-list"></div>
-															</div>
-															
-															<!-- Selected Candidates -->
-															<div class="selected-candidates" id="selected_'.$row['id'].'">
-																<h5 style="color: #2c5aa0; margin-bottom: 15px;">Selected Candidates:</h5>
-																<div class="selected-list" style="min-height: 50px; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
-																	<p class="text-muted text-center" style="margin: 0;">No candidates selected yet</p>
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										';
-									}	
-				        		?>
-				        		<div class="text-center" style="margin-top: 30px;">
-					        		<button type="button" class="btn btn-info btn-lg" style="background-color: #17a2b8; border-color: #17a2b8; color: white; margin-right: 15px; border-radius: 25px; padding: 10px 30px;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
-					        		<button type="submit" class="btn btn-success btn-lg" style="background-color: #28a745; border-color: #28a745; color: white; border-radius: 25px; padding: 10px 30px;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
-					        	</div>
-				        	</form>
-				        	<!-- End Voting Ballot -->
-				    		<?php
-				    	}
-				    ?>
-
-	        	</div>
-	        </div>
-	      </section>
-	     
-	    </div>
-	  </div>
+                                            echo '
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div class="box" style="background-color: #f8f9fa; border: 2px solid #e3f2fd; border-radius: 8px; margin-bottom: 20px;" id="'.$row['id'].'">
+                                                            <div class="box-header with-border" style="background-color: #e3f2fd; border-radius: 6px 6px 0 0;">
+                                                                <h3 class="box-title" style="color: #2c5aa0; font-weight: bold;">'.$row['description'].'</h3>
+                                                            </div>
+                                                            <div class="box-body" style="padding: 20px;">
+                                                                <p style="color: #333; margin-bottom: 15px;">'.$instruct.'</p>
+                                                                
+                                                                <!-- Search Container - Initially visible -->
+                                                                <div class="search-container" id="search-container-'.$row['id'].'" style="margin-bottom: 20px;">
+                                                                    <div class="input-group">
+                                                                        <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #4a90e2; border-radius: 25px 0 0 25px; padding: 10px 15px;" data-position="'.$row['id'].'" data-slug="'.$slug.'" data-max-vote="'.$row['max_vote'].'">
+                                                                        <span class="input-group-btn">
+                                                                            <button class="btn btn-primary search-btn" type="button" style="background-color: #4a90e2; border-color: #4a90e2; border-radius: 0 25px 25px 0; padding: 10px 20px;"><i class="fa fa-search"></i></button>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <!-- Search Results -->
+                                                                <div class="search-results" id="results_'.$row['id'].'" style="display: none;">
+                                                                    <h5 style="color: #2c5aa0; margin-bottom: 15px;">Search Results:</h5>
+                                                                    <div class="candidates-list"></div>
+                                                                </div>
+                                                                
+                                                                <!-- Selected Candidates -->
+                                                                <div class="selected-candidates" id="selected_'.$row['id'].'">
+                                                                    <h5 style="color: #2c5aa0; margin-bottom: 15px;">Selected Candidates:</h5>
+                                                                    <div class="selected-list" style="min-height: 50px; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
+                                                                        <p class="text-muted text-center" style="margin: 0;">No candidates selected yet</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ';
+                                        }    
+                                    ?>
+                                    <div class="text-center" style="margin-top: 30px;">
+                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #17a2b8; border-color: #17a2b8; color: white; margin-right: 15px; border-radius: 25px; padding: 10px 30px;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #28a745; border-color: #28a745; color: white; border-radius: 25px; padding: 10px 30px;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
+                                    </div>
+                                </form>
+                                <!-- End Voting Ballot -->
+                                <?php
+                            }
+                        ?>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
   
-  	<?php include 'includes/footer.php'; ?>
-  	<?php include 'includes/ballot_modal.php'; ?>
+    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/ballot_modal.php'; ?>
 </div>
 
 <!-- Candidate Details Modal -->
@@ -180,20 +172,18 @@
 
 <?php include 'includes/scripts.php'; ?>
 
-<!-- AJAX Search Script -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
 $(document).ready(function(){
     let selectedCandidates = {};
     let currentCandidate = null;
     
-    // Auto-fade messages after 30 seconds
+    // Auto-fade messages after 20 seconds
     function setupAutoFadeMessages() {
         $('.floating-alert').each(function() {
             if ($(this).is(':visible')) {
                 setTimeout(() => {
                     $(this).fadeOut(1000);
-                }, 30000); // 30 seconds
+                }, 20000); // 20 seconds
             }
         });
     }
@@ -208,10 +198,10 @@ $(document).ready(function(){
                   .addClass('alert-' + type)
                   .fadeIn(500);
         
-        // Auto-fade after 30 seconds
+        // Auto-fade after 20 seconds
         setTimeout(() => {
             $(alertId).fadeOut(1000);
-        }, 30000);
+        }, 20000);
     }
     
     // Initialize auto-fade for existing messages
@@ -296,12 +286,8 @@ $(document).ready(function(){
                                 <p style="color: #666; font-size: 14px;">${platform.substring(0, 100)}${platform.length > 100 ? '...' : ''}</p>
                             </div>
                             <div class="col-md-3 text-center">
-                                <button type="button" class="btn btn-info btn-sm view-details" style="background-color: #17a2b8; border-radius: 20px; margin-bottom: 5px;">
-                                    <i class="fa fa-eye"></i> View Details
-                                </button>
-                                <br>
-                                <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #28a745; border-radius: 20px;">
-                                    <i class="fa fa-plus"></i> Select
+                                <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #28a745; border-radius: 20px; width: 100%; margin-bottom: 5px;">
+                                    <i class="fa fa-check"></i> Select
                                 </button>
                             </div>
                         </div>
@@ -315,59 +301,6 @@ $(document).ready(function(){
             resultsContainer.show();
         }
     }
-    
-    // View candidate details
-    $(document).on('click', '.view-details', function(e) {
-        e.stopPropagation();
-        let item = $(this).closest('.candidate-item');
-        currentCandidate = {
-            id: item.data('candidate-id'),
-            firstname: item.data('firstname'),
-            lastname: item.data('lastname'),
-            photo: item.data('photo'),
-            platform: item.data('platform'),
-            position: item.data('position'),
-            slug: item.data('slug'),
-            maxVote: item.data('max-vote')
-        };
-        
-        $('#candidatePhoto').attr('src', currentCandidate.photo);
-        $('#candidateName').text(currentCandidate.firstname + ' ' + currentCandidate.lastname);
-        $('#candidatePlatform').html(currentCandidate.platform);
-        $('#candidateModal').modal('show');
-    });
-    
-    // Select candidate from modal
-    $('#selectCandidate').click(function() {
-        if(currentCandidate) {
-            selectCandidate(currentCandidate);
-            $('#candidateModal').modal('hide');
-        }
-    });
-    
-    // Select candidate directly from search results
-    $(document).on('click', '.select-candidate', function(e) {
-        e.stopPropagation();
-        let item = $(this).closest('.candidate-item');
-        let candidate = {
-            id: item.data('candidate-id'),
-            firstname: item.data('firstname'),
-            lastname: item.data('lastname'),
-            photo: item.data('photo'),
-            platform: item.data('platform'),
-            position: item.data('position'),
-            slug: item.data('slug'),
-            maxVote: item.data('max-vote')
-        };
-        selectCandidate(candidate);
-    });
-    
-    // Click on candidate item to view details
-    $(document).on('click', '.candidate-item', function(e) {
-        if (!$(e.target).hasClass('btn') && !$(e.target).closest('.btn').length) {
-            $(this).find('.view-details').click();
-        }
-    });
     
     // Function to select candidate with enhanced validation
     function selectCandidate(candidate) {
@@ -391,6 +324,10 @@ $(document).ready(function(){
         selectedCandidates[candidate.position].push(candidate);
         updateSelectedCandidates(candidate.position);
         updateHiddenInputs(candidate.position, candidate.slug, candidate.maxVote);
+        
+        // Hide search container for this position
+        $('#search-container-' + candidate.position).hide();
+        
         showFloatingMessage(`${candidate.firstname} ${candidate.lastname} has been selected successfully!`, 'success');
     }
     
@@ -401,6 +338,8 @@ $(document).ready(function(){
         
         if(candidates.length === 0) {
             container.html('<p class="text-muted text-center" style="margin: 0;">No candidates selected yet</p>');
+            // Show search container when no candidates are selected
+            $('#search-container-' + positionId).show();
         } else {
             let html = '';
             candidates.forEach(function(candidate, index) {
@@ -413,7 +352,7 @@ $(document).ready(function(){
                             </div>
                             <div class="col-md-8">
                                 <h6 style="color: #2c5aa0; margin: 0; font-weight: bold;">${candidate.firstname} ${candidate.lastname}</h6>
-                                <small style="color: #666;">Position ${index + 1}</small>
+                                <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">${candidate.platform.substring(0, 50)}${candidate.platform.length > 50 ? '...' : ''}</p>
                             </div>
                             <div class="col-md-2 text-right">
                                 <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${positionId}" data-candidate-id="${candidate.id}" style="border-radius: 15px;" title="Remove candidate">
@@ -469,28 +408,21 @@ $(document).ready(function(){
         });
     }
     
-    // Reset functionality with confirmation
-    $(document).on('click', '.reset', function(e) {
-        e.preventDefault();
-        let desc = $(this).data('desc');
-        let positionId = $('.candidate-search[data-slug="' + desc + '"]').data('position');
-        
-        if (selectedCandidates[positionId] && selectedCandidates[positionId].length > 0) {
-            if (confirm('Are you sure you want to reset all selections for this position?')) {
-                selectedCandidates[positionId] = [];
-                updateSelectedCandidates(positionId);
-                $(`input[name^="${desc}"]`).remove();
-                $('.candidate-search[data-slug="' + desc + '"]').val('');
-                $('#results_' + positionId).hide();
-                showFloatingMessage('Selections have been reset for this position.', 'info');
-            }
-        } else {
-            selectedCandidates[positionId] = [];
-            updateSelectedCandidates(positionId);
-            $(`input[name^="${desc}"]`).remove();
-            $('.candidate-search[data-slug="' + desc + '"]').val('');
-            $('#results_' + positionId).hide();
-        }
+    // Select candidate directly from search results
+    $(document).on('click', '.select-candidate', function(e) {
+        e.stopPropagation();
+        let item = $(this).closest('.candidate-item');
+        let candidate = {
+            id: item.data('candidate-id'),
+            firstname: item.data('firstname'),
+            lastname: item.data('lastname'),
+            photo: item.data('photo'),
+            platform: item.data('platform'),
+            position: item.data('position'),
+            slug: item.data('slug'),
+            maxVote: item.data('max-vote')
+        };
+        selectCandidate(candidate);
     });
     
     // Enhanced Preview functionality
