@@ -6,25 +6,25 @@
   <?php include 'includes/menubar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper" style="background-color:#F1E9D2 ;color:black ; font-size: 17px; font-family:Times ">
+  <div class="content-wrapper" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: #2c3e50; font-size: 17px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
     <!-- Content Header (Page header) -->
-    <section class="content-header" style= "color:black ; font-size: 17px; font-family:Times">
-      <h1>
-        VOTES SUMMARY
+    <section class="content-header" style="background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 10px; margin: 15px; box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);">
+      <h1 style="margin: 0; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        <i class="fa fa-bar-chart" style="margin-right: 10px;"></i>VOTES SUMMARY
       </h1>
-      <ol class="breadcrumb" style="color:black ; font-size: 17px; font-family:Times">
-        <li><a href="#"><i class="fa fa-dashboard" ></i> Home</a></li>
-        <li class="active" style="color:black ; font-size: 17px; font-family:Times" >Dashboard</li>
+      <ol class="breadcrumb" style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 15px; margin-top: 10px;">
+        <li><a href="#" style="color: #e0e7ff;"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active" style="color: white;">Dashboard</li>
       </ol>
     </section>
 
     <!-- Main content -->
-    <section class="content">
+    <section class="content" style="padding: 0 15px;">
       <?php
         if(isset($_SESSION['error'])){
           echo "
-            <div class='alert alert-danger alert-dismissible'>
-              <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+            <div class='alert alert-danger alert-dismissible' style='background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);'>
+              <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color: white; opacity: 0.8;'>&times;</button>
               <h4><i class='icon fa fa-warning'></i> Error!</h4>
               ".$_SESSION['error']."
             </div>
@@ -33,8 +33,8 @@
         }
         if(isset($_SESSION['success'])){
           echo "
-            <div class='alert alert-success alert-dismissible'>
-              <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+            <div class='alert alert-success alert-dismissible' style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);'>
+              <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color: white; opacity: 0.8;'>&times;</button>
               <h4><i class='icon fa fa-check'></i> Success!</h4>
               ".$_SESSION['success']."
             </div>
@@ -45,14 +45,16 @@
 
       <div class="row">
         <div class="col-xs-12">
-          <div class="box" style="background-color: #d8d1bd">
-            <div class="box-header with-border" style="background-color: #d8d1bd">
+          <div class="box" style="background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; overflow: hidden;">
+            <div class="box-header with-border" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-bottom: 3px solid #3b82f6; padding: 20px;">
               <div class="row">
                 <div class="col-md-6">
                   <!-- Position Filter -->
                   <div class="form-group">
-                    <label for="position_filter" style="color:black; font-size: 14px; font-family:Times">Filter by Position:</label>
-                    <select id="position_filter" class="form-control" style="width: 200px; display: inline-block; margin-left: 10px;">
+                    <label for="position_filter" style="color: #1e40af; font-size: 16px; font-weight: 600; margin-bottom: 8px; display: block;">
+                      <i class="fa fa-filter" style="margin-right: 8px;"></i>Filter by Position:
+                    </label>
+                    <select id="position_filter" class="form-control" style="width: 250px; border: 2px solid #3b82f6; border-radius: 8px; padding: 10px; font-size: 14px; background: white;">
                       <option value="">All Positions</option>
                       <?php
                         $pos_sql = "SELECT * FROM positions ORDER BY priority ASC";
@@ -66,161 +68,206 @@
                   </div>
                 </div>
                 <div class="col-md-6 text-right">
-                  <a href="#reset" data-toggle="modal" class="btn btn-danger btn-sm btn-curve" style="background-color: #ff8e88;color:black ; font-size: 12px; font-family:Times">
-                    <i class="fa fa-refresh"></i> Reset Votes
+                  <a href="#reset" data-toggle="modal" class="btn btn-curve" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 25px; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); transition: all 0.3s ease;">
+                    <i class="fa fa-refresh" style="margin-right: 8px;"></i> Reset Votes
                   </a>
                 </div>
               </div>
             </div>
             
-            <div class="box-body">
-              <table id="example1" class="table table-bordered table-striped">
-                <thead style="background-color: #c8c1a4;">
-                  <th style="color:black; font-weight: bold;">Position</th>
-                  <th style="color:black; font-weight: bold;">Candidate</th>
-                  <th style="color:black; font-weight: bold;">Vote Count</th>
-                  <th style="color:black; font-weight: bold;">Percentage</th>
-                </thead>
-                <tbody>
-                  <?php
-                    // Get filter parameter
-                    $position_filter = isset($_GET['position']) ? $_GET['position'] : '';
-                    
-                    // Base query to get vote counts per candidate
-                    $sql = "SELECT 
-                              p.id as position_id,
-                              p.description as position_name,
-                              p.priority,
-                              c.id as candidate_id,
-                              c.firstname as candidate_first,
-                              c.lastname as candidate_last,
-                              c.photo as candidate_photo,
-                              COUNT(v.id) as vote_count
-                            FROM positions p
-                            LEFT JOIN candidates c ON c.position_id = p.id
-                            LEFT JOIN votes v ON v.candidate_id = c.id
-                            WHERE 1=1";
-                    
-                    // Add position filter if selected
-                    if(!empty($position_filter)){
-                      $sql .= " AND p.id = ".$position_filter;
-                    }
-                    
-                    $sql .= " GROUP BY p.id, c.id
-                             ORDER BY p.priority ASC, vote_count DESC";
-                    
-                    $query = $conn->query($sql);
-                    
-                    // Get total votes per position for percentage calculation
-                    $position_totals = array();
-                    $total_sql = "SELECT 
-                                    p.id as position_id,
-                                    COUNT(v.id) as total_votes
-                                  FROM positions p
-                                  LEFT JOIN votes v ON v.position_id = p.id
-                                  WHERE 1=1";
-                    if(!empty($position_filter)){
-                      $total_sql .= " AND p.id = ".$position_filter;
-                    }
-                    $total_sql .= " GROUP BY p.id";
-                    
-                    $total_query = $conn->query($total_sql);
-                    while($total_row = $total_query->fetch_assoc()){
-                      $position_totals[$total_row['position_id']] = $total_row['total_votes'];
-                    }
-                    
-                    $current_position = '';
-                    while($row = $query->fetch_assoc()){
-                      // Calculate percentage
-                      $total_votes_for_position = isset($position_totals[$row['position_id']]) ? $position_totals[$row['position_id']] : 0;
-                      $percentage = ($total_votes_for_position > 0) ? round(($row['vote_count'] / $total_votes_for_position) * 100, 1) : 0;
+            <div class="box-body" style="padding: 25px;">
+              <div style="overflow-x: auto;">
+                <table id="example1" class="table table-hover" style="margin: 0; border-collapse: separate; border-spacing: 0;">
+                  <thead>
+                    <tr style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
+                      <th style="padding: 15px; font-weight: 600; text-align: center; border-radius: 10px 0 0 0;">
+                        <i class="fa fa-briefcase" style="margin-right: 8px;"></i>Position
+                      </th>
+                      <th style="padding: 15px; font-weight: 600; text-align: center;">
+                        <i class="fa fa-user" style="margin-right: 8px;"></i>Candidate
+                      </th>
+                      <th style="padding: 15px; font-weight: 600; text-align: center;">
+                        <i class="fa fa-trophy" style="margin-right: 8px;"></i>Vote Count
+                      </th>
+                      <th style="padding: 15px; font-weight: 600; text-align: center; border-radius: 0 10px 0 0;">
+                        <i class="fa fa-percent" style="margin-right: 8px;"></i>Percentage
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      // Get filter parameter
+                      $position_filter = isset($_GET['position']) ? $_GET['position'] : '';
                       
-                      // Highlight row if this candidate is winning
-                      $row_class = '';
-                      if($row['vote_count'] > 0) {
-                        // Check if this is the highest vote count for this position
-                        $check_sql = "SELECT MAX(vote_counts.vote_count) as max_votes 
-                                      FROM (
-                                        SELECT COUNT(v2.id) as vote_count
-                                        FROM candidates c2 
-                                        LEFT JOIN votes v2 ON v2.candidate_id = c2.id
-                                        WHERE c2.position_id = ".$row['position_id']."
-                                        GROUP BY c2.id
-                                      ) as vote_counts";
-                        $check_query = $conn->query($check_sql);
-                        $max_row = $check_query->fetch_assoc();
-                        if($row['vote_count'] == $max_row['max_votes'] && $row['vote_count'] > 0) {
-                          $row_class = 'style="background-color: #d4edda;"'; // Light green for leading candidate
+                      // Base query to get vote counts per candidate
+                      $sql = "SELECT 
+                                p.id as position_id,
+                                p.description as position_name,
+                                p.priority,
+                                c.id as candidate_id,
+                                c.firstname as candidate_first,
+                                c.lastname as candidate_last,
+                                c.photo as candidate_photo,
+                                COUNT(v.id) as vote_count
+                              FROM positions p
+                              LEFT JOIN candidates c ON c.position_id = p.id
+                              LEFT JOIN votes v ON v.candidate_id = c.id
+                              WHERE 1=1";
+                      
+                      // Add position filter if selected
+                      if(!empty($position_filter)){
+                        $sql .= " AND p.id = ".$position_filter;
+                      }
+                      
+                      $sql .= " GROUP BY p.id, c.id
+                               ORDER BY p.priority ASC, vote_count DESC";
+                      
+                      $query = $conn->query($sql);
+                      
+                      // Get total votes per position for percentage calculation
+                      $position_totals = array();
+                      $total_sql = "SELECT 
+                                      p.id as position_id,
+                                      COUNT(v.id) as total_votes
+                                    FROM positions p
+                                    LEFT JOIN votes v ON v.position_id = p.id
+                                    WHERE 1=1";
+                      if(!empty($position_filter)){
+                        $total_sql .= " AND p.id = ".$position_filter;
+                      }
+                      $total_sql .= " GROUP BY p.id";
+                      
+                      $total_query = $conn->query($total_sql);
+                      while($total_row = $total_query->fetch_assoc()){
+                        $position_totals[$total_row['position_id']] = $total_row['total_votes'];
+                      }
+                      
+                      $current_position = '';
+                      $row_counter = 0;
+                      while($row = $query->fetch_assoc()){
+                        $row_counter++;
+                        // Calculate percentage
+                        $total_votes_for_position = isset($position_totals[$row['position_id']]) ? $position_totals[$row['position_id']] : 0;
+                        $percentage = ($total_votes_for_position > 0) ? round(($row['vote_count'] / $total_votes_for_position) * 100, 1) : 0;
+                        
+                        // Determine row styling
+                        $row_style = '';
+                        $is_leading = false;
+                        if($row['vote_count'] > 0) {
+                          // Check if this is the highest vote count for this position
+                          $check_sql = "SELECT MAX(vote_counts.vote_count) as max_votes 
+                                        FROM (
+                                          SELECT COUNT(v2.id) as vote_count
+                                          FROM candidates c2 
+                                          LEFT JOIN votes v2 ON v2.candidate_id = c2.id
+                                          WHERE c2.position_id = ".$row['position_id']."
+                                          GROUP BY c2.id
+                                        ) as vote_counts";
+                          $check_query = $conn->query($check_sql);
+                          $max_row = $check_query->fetch_assoc();
+                          if($row['vote_count'] == $max_row['max_votes'] && $row['vote_count'] > 0) {
+                            $row_style = 'background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-left: 4px solid #059669;';
+                            $is_leading = true;
+                          }
                         }
+                        
+                        if(!$is_leading) {
+                          $row_style = ($row_counter % 2 == 0) ? 'background: #f8fafc;' : 'background: white;';
+                        }
+                        
+                        echo "
+                          <tr style='color: #374151; font-size: 15px; transition: all 0.3s ease; $row_style' onmouseover='this.style.background=\"#e0f2fe\"' onmouseout='this.style.background=\"".($is_leading ? 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)' : (($row_counter % 2 == 0) ? '#f8fafc' : 'white'))."\"'>
+                            <td style='padding: 15px; vertical-align: middle; font-weight: 600; color: #1e40af;'>";
+                        
+                        if($is_leading) {
+                          echo "<i class='fa fa-crown' style='color: #f59e0b; margin-right: 8px;'></i>";
+                        }
+                        
+                        echo $row['position_name']."</td>
+                            <td style='padding: 15px; vertical-align: middle;'>";
+                        
+                        // Show candidate photo if available
+                        if(!empty($row['candidate_photo'])) {
+                          echo "<img src='images/".$row['candidate_photo']."' style='height: 40px; width: 40px; border-radius: 50%; margin-right: 12px; border: 2px solid #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);'>";
+                        } else {
+                          echo "<div style='height: 40px; width: 40px; border-radius: 50%; margin-right: 12px; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;'>".strtoupper(substr($row['candidate_first'], 0, 1))."</div>";
+                        }
+                        
+                        echo "<span style='font-weight: 500;'>".$row['candidate_first'].' '.$row['candidate_last']."</span>";
+                        
+                        if($is_leading) {
+                          echo " <span style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px;'>LEADING</span>";
+                        }
+                        
+                        echo "</td>
+                            <td style='padding: 15px; vertical-align: middle; text-align: center;'>
+                              <span style='background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);'>".$row['vote_count']."</span>
+                            </td>
+                            <td style='padding: 15px; vertical-align: middle;'>";
+                        
+                        // Enhanced progress bar for percentage
+                        if($percentage > 0) {
+                          $bar_color = $is_leading ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)';
+                          echo "<div style='background: #f1f5f9; border-radius: 25px; overflow: hidden; height: 25px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);'>
+                                  <div style='background: $bar_color; width: ".$percentage."%; height: 100%; border-radius: 25px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; transition: width 0.5s ease;'>
+                                    ".$percentage."%
+                                  </div>
+                                </div>";
+                        } else {
+                          echo "<div style='background: #f1f5f9; border-radius: 25px; height: 25px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 500; font-size: 12px;'>0%</div>";
+                        }
+                        
+                        echo "</td>
+                          </tr>
+                        ";
                       }
                       
-                      echo "
-                        <tr style='color:black ; font-size: 15px; font-family:Times' $row_class>
-                          <td><strong>".$row['position_name']."</strong></td>
-                          <td>";
-                      
-                      // Show candidate photo if available
-                      if(!empty($row['candidate_photo'])) {
-                        echo "<img src='images/".$row['candidate_photo']."' style='height: 30px; width: 30px; border-radius: 50%; margin-right: 10px;'>";
+                      // Show message if no data
+                      if($query->num_rows == 0) {
+                        echo "<tr><td colspan='4' style='text-align: center; color: #64748b; padding: 40px; font-style: italic;'>
+                                <i class='fa fa-info-circle' style='font-size: 24px; margin-bottom: 10px; display: block;'></i>
+                                No candidates or votes found
+                              </td></tr>";
                       }
-                      
-                      echo $row['candidate_first'].' '.$row['candidate_last']."
-                          </td>
-                          <td><strong>".$row['vote_count']."</strong></td>
-                          <td>";
-                      
-                      // Progress bar for percentage
-                      if($percentage > 0) {
-                        echo "<div class='progress' style='height: 20px; margin-bottom: 0;'>
-                                <div class='progress-bar progress-bar-info' role='progressbar' 
-                                     style='width: ".$percentage."%; background-color: #5bc0de;'>
-                                  ".$percentage."%
-                                </div>
-                              </div>";
-                      } else {
-                        echo "0%";
-                      }
-                      
-                      echo "</td>
-                        </tr>
-                      ";
-                    }
-                    
-                    // Show message if no data
-                    if($query->num_rows == 0) {
-                      echo "<tr><td colspan='4' style='text-align: center; color: #666;'>No candidates or votes found</td></tr>";
-                    }
-                  ?>
-                </tbody>
-              </table>
+                    ?>
+                  </tbody>
+                </table>
+              </div>
               
               <!-- Vote Summary Statistics -->
-              <div class="row" style="margin-top: 20px;">
+              <div class="row" style="margin-top: 30px;">
                 <div class="col-md-12">
-                  <div class="info-box" style="background-color: #e8e1cc;">
-                    <span class="info-box-icon" style="background-color: #5bc0de;"><i class="fa fa-bar-chart"></i></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text" style="color: black; font-family: Times;">Total Statistics</span>
-                      <span class="info-box-number" style="color: black; font-family: Times;">
-                        <?php
-                          // Get total votes cast
-                          $stats_sql = "SELECT COUNT(*) as total_votes FROM votes";
-                          if(!empty($position_filter)){
-                            $stats_sql .= " WHERE position_id = ".$position_filter;
-                          }
-                          $stats_query = $conn->query($stats_sql);
-                          $stats_row = $stats_query->fetch_assoc();
-                          echo "Total Votes Cast: ".$stats_row['total_votes'];
-                          
-                          // Get total registered voters
-                          $voters_sql = "SELECT COUNT(*) as total_voters FROM voters";
-                          $voters_query = $conn->query($voters_sql);
-                          $voters_row = $voters_query->fetch_assoc();
-                          $turnout = ($voters_row['total_voters'] > 0) ? round(($stats_row['total_votes'] / $voters_row['total_voters']) * 100, 1) : 0;
-                          echo " | Registered Voters: ".$voters_row['total_voters'];
-                          echo " | Turnout: ".$turnout."%";
-                        ?>
-                      </span>
+                  <div class="info-box" style="background: white; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: none; overflow: hidden;">
+                    <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 20px; color: white;">
+                      <div style="display: flex; align-items: center;">
+                        <span class="info-box-icon" style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                          <i class="fa fa-bar-chart" style="font-size: 24px;"></i>
+                        </span>
+                        <div>
+                          <span style="font-size: 18px; font-weight: 600; display: block; margin-bottom: 5px;">Election Statistics</span>
+                          <span style="font-size: 24px; font-weight: 700;">
+                            <?php
+                              // Get total votes cast
+                              $stats_sql = "SELECT COUNT(*) as total_votes FROM votes";
+                              if(!empty($position_filter)){
+                                $stats_sql .= " WHERE position_id = ".$position_filter;
+                              }
+                              $stats_query = $conn->query($stats_sql);
+                              $stats_row = $stats_query->fetch_assoc();
+                              
+                              // Get total registered voters
+                              $voters_sql = "SELECT COUNT(*) as total_voters FROM voters";
+                              $voters_query = $conn->query($voters_sql);
+                              $voters_row = $voters_query->fetch_assoc();
+                              $turnout = ($voters_row['total_voters'] > 0) ? round(($stats_row['total_votes'] / $voters_row['total_voters']) * 100, 1) : 0;
+                              
+                              echo "<span style='color: #fbbf24;'>".$stats_row['total_votes']."</span> Total Votes";
+                              echo " | <span style='color: #a78bfa;'>".$voters_row['total_voters']."</span> Registered";
+                              echo " | <span style='color: #34d399;'>".$turnout."%</span> Turnout";
+                            ?>
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -271,48 +318,142 @@ $(document).ready(function() {
       { 'orderable': false, 'targets': 3 } // Disable sorting on percentage column
     ]
   });
+  
+  // Add hover effects for buttons
+  $('a[href="#reset"]').hover(
+    function() {
+      $(this).css({
+        'transform': 'translateY(-2px)',
+        'box-shadow': '0 6px 20px rgba(220, 38, 38, 0.4)'
+      });
+    },
+    function() {
+      $(this).css({
+        'transform': 'translateY(0)',
+        'box-shadow': '0 4px 12px rgba(220, 38, 38, 0.3)'
+      });
+    }
+  );
 });
 </script>
 
 <style>
-.progress {
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+/* Enhanced styling for the voting system */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .table > thead > tr > th {
-  border-bottom: 2px solid #a69c7f;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
 }
 
 .table > tbody > tr > td {
-  border-top: 1px solid #ddd;
-  vertical-align: middle;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.info-box {
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-  margin-bottom: 15px;
+.table > tbody > tr:last-child > td {
+  border-bottom: none;
 }
 
 .alert {
+  border: none;
+  margin: 15px;
+}
+
+.form-control {
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Custom scrollbar for table */
+.box-body::-webkit-scrollbar {
+  height: 8px;
+}
+
+.box-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
   border-radius: 4px;
+}
+
+.box-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  border-radius: 4px;
+}
+
+.box-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .content-header {
+    margin: 10px !important;
+    padding: 15px !important;
+  }
+  
   .box-header .row {
     margin: 0;
   }
   
   .box-header .col-md-6 {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
   
-  .form-control {
+  #position_filter {
     width: 100% !important;
   }
+  
+  .table-responsive {
+    border: none;
+  }
+  
+  .info-box-content span {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-header h1 {
+    font-size: 24px !important;
+  }
+  
+  .table > thead > tr > th,
+  .table > tbody > tr > td {
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+  
+  .btn {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Animation for leading candidates */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+.fa-crown {
+  animation: pulse 2s infinite;
 }
 </style>
 
