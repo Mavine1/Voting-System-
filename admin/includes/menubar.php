@@ -16,7 +16,7 @@
     <ul class="sidebar-menu" data-widget="tree" style="background-color: #786974 ; color:white ; font-size: 15px; font-family:Times  " >
       <li class="header" style="background-color: #28272D ;color:white ; font-size: 12px; font-family:Times  ">REPORTS</li>
       <li class=""><a href="home.php"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-      <li class=""><a href="votes.php"><span class="glyphicon glyphicon-lock"></span> <span>Votes</span></a></li>
+      <li class=""><a href="votes.php"><span class="glyphicon glyphicon-lock"></span> <span>Total votes</span></a></li>
       <li class="header" style="background-color: #28272D ;color:white ; font-size: 12px; font-family:Times ">MANAGE</li>
       <li class=""><a href="voters.php"><i class="fa fa-users"></i> <span>Voters</span></a></li>
       <li class=""><a href="positions.php"><i class="fa fa-tasks"></i> <span>Positions</span></a></li>
