@@ -5,8 +5,8 @@
 
     <?php include 'includes/navbar.php'; ?>
      
-    <div class="content-wrapper" style="background-color: #f8fafc">
-        <div class="container" style="background-color: #f8fafc">
+    <div class="content-wrapper" style="background-color: #f0f9ff">
+        <div class="container" style="background-color: #f0f9ff">
 
             <!-- Main content -->
             <section class="content">
@@ -14,7 +14,7 @@
                     $parse = parse_ini_file('admin/config.ini', FALSE, INI_SCANNER_RAW);
                     $title = $parse['election_title'];
                 ?>
-                <h1 class="page-header text-center title" style="color: #7c3aed;"><b><?php echo strtoupper($title); ?></b></h1>
+                <h1 class="page-header text-center title" style="color: #e11d48;"><b><?php echo strtoupper($title); ?></b></h1>
                 <div class="row">
                     <div class="col-sm-10 col-sm-offset-1">
 
@@ -30,7 +30,7 @@
                             }
 
                             if(isset($_SESSION['success'])) {
-                                echo '<div class="alert alert-success floating-alert" id="success-alert" style="background-color: #f0fdf4; border-color: #bbf7d0; color: #16a34a;">';
+                                echo '<div class="alert alert-success floating-alert" id="success-alert" style="background-color: #ecfdf5; border-color: #bbf7d0; color: #059669;">';
                                 echo "<h4><i class='icon fa fa-check'></i> Success!</h4>{$_SESSION['success']}";
                                 echo '</div>';
                                 unset($_SESSION['success']);
@@ -41,7 +41,7 @@
                             <span class="message"></span>
                         </div>
 
-                        <div class="alert alert-info floating-alert" id="info-alert" style="display:none; background-color: #eff6ff; border-color: #bfdbfe; color: #2563eb;">
+                        <div class="alert alert-info floating-alert" id="info-alert" style="display:none; background-color: #ecfdf5; border-color: #bbf7d0; color: #059669;">
                             <span class="info-message"></span>
                         </div>
 
@@ -50,9 +50,9 @@
                             $vquery = $conn->query($sql);
                             if($vquery->num_rows > 0){
                                 ?>
-                                <div class="text-center" style="color: #7c3aed; font-size: 35px; font-family: Arial, sans-serif;">
+                                <div class="text-center" style="color: #e11d48; font-size: 35px; font-family: Arial, sans-serif;">
                                     <h3>You have already voted for this election.</h3>
-                                    <a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #8b5cf6; border-color: #8b5cf6; color: white; font-size: 22px; font-family: Arial, sans-serif;">View Ballot</a>
+                                    <a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #f97316; border-color: #f97316; color: white; font-size: 22px; font-family: Arial, sans-serif;">View Ballot</a>
                                 </div>
                                 <?php
                             } else {
@@ -70,7 +70,7 @@
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <div class="box" style="background-color: #ffffff; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" id="<?php echo $row['id']; ?>">
-                                                        <div class="box-header with-border" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border-radius: 10px 10px 0 0; padding: 20px;">
+                                                        <div class="box-header with-border" style="background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%); border-radius: 10px 10px 0 0; padding: 20px;">
                                                             <h3 class="box-title" style="color: #ffffff; font-weight: bold; margin: 0;"><?php echo htmlspecialchars($row['description']); ?></h3>
                                                         </div>
                                                         <div class="box-body" style="padding: 25px;">
@@ -81,7 +81,7 @@
                                                                     <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #d1d5db; border-radius: 25px 0 0 25px; padding: 12px 18px; font-size: 16px; transition: border-color 0.3s ease;" 
                                                                         data-position="<?php echo $row['id']; ?>" data-slug="<?php echo $slug; ?>" data-max-vote="<?php echo $row['max_vote']; ?>">
                                                                     <span class="input-group-btn">
-                                                                        <button class="btn btn-primary search-btn" type="button" style="background: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 0 25px 25px 0; padding: 12px 24px;">
+                                                                        <button class="btn btn-primary search-btn" type="button" style="background: #0ea5e9; border-color: #0ea5e9; color: #ffffff; border-radius: 0 25px 25px 0; padding: 12px 24px;">
                                                                             Search
                                                                         </button>
                                                                     </span>
@@ -90,13 +90,13 @@
 
                                                             <!-- Search Results -->
                                                             <div class="search-results" id="results_<?php echo $row['id']; ?>" style="display: none;">
-                                                                <h5 style="color: #7c3aed; margin-bottom: 18px; font-weight: 600;">Search Results:</h5>
+                                                                <h5 style="color: #e11d48; margin-bottom: 18px; font-weight: 600;">Search Results:</h5>
                                                                 <div class="candidates-list"></div>
                                                             </div>
 
                                                             <!-- Selected Candidates -->
                                                             <div class="selected-candidates" id="selected_<?php echo $row['id']; ?>">
-                                                                <h5 style="color: #7c3aed; margin-bottom: 18px; font-weight: 600;">Selected Candidates:</h5>
+                                                                <h5 style="color: #e11d48; margin-bottom: 18px; font-weight: 600;">Selected Candidates:</h5>
                                                                 <div class="selected-list" style="min-height: 60px; border: 2px dashed #d1d5db; padding: 20px; border-radius: 12px; background-color: #f9fafb;">
                                                                     <p class="text-muted text-center" style="margin: 0; color: #9ca3af;">No candidates selected yet</p>
                                                                 </div>
@@ -109,7 +109,7 @@
                                         }
                                     ?>
                                     <div class="text-center" style="margin-top: 40px;">
-                                        <button type="button" class="btn btn-info btn-lg" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); border-color: #0891b2; color: white; margin-right: 20px; border-radius: 25px; padding: 12px 35px; font-size: 16px; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="button" class="btn btn-info btn-lg" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); border-color: #0ea5e9; color: white; margin-right: 20px; border-radius: 25px; padding: 12px 35px; font-size: 16px; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
                                         <button type="submit" class="btn btn-success btn-lg" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-color: #059669; color: white; border-radius: 25px; padding: 12px 35px; font-size: 16px; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
                                     </div>
                                 </form>
@@ -148,14 +148,14 @@ $(function() {
 
         if (type === 'success') {
             $(alertId).css({
-                'background-color': '#f0fdf4',
+                'background-color': '#ecfdf5',
                 'border-color': '#bbf7d0',
-                'color': '#16a34a'
+                'color': '#059669'
             });
         } else if (type === 'warning') {
             $(alertId).css({
-                'background-color': '#fffbeb',
-                'border-color': '#fed7aa',
+                'background-color': '#fef3c7',
+                'border-color': '#fcd34d',
                 'color': '#d97706'
             });
         } else {
@@ -186,7 +186,7 @@ $(function() {
         let $list = $results.find('.candidates-list');
 
         // Add focus styling
-        $(this).css('border-color', '#7c3aed');
+        $(this).css('border-color', '#e11d48');
 
         if (val.length < 2) {
             $results.hide();
@@ -194,7 +194,7 @@ $(function() {
             return;
         }
 
-        $list.html('<div class="text-center" style="color: #7c3aed;"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
+        $list.html('<div class="text-center" style="color: #e11d48;"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
         $results.show();
 
         $.ajax({
@@ -237,7 +237,7 @@ $(function() {
 
                 // Add hover effects
                 $('.candidate-item').hover(
-                    function() { $(this).css({'border-color': '#7c3aed', 'transform': 'translateY(-2px)', 'box-shadow': '0 4px 12px rgba(124, 58, 237, 0.15)'}); },
+                    function() { $(this).css({'border-color': '#e11d48', 'transform': 'translateY(-2px)', 'box-shadow': '0 4px 12px rgba(225, 29, 72, 0.15)'}); },
                     function() { $(this).css({'border-color': '#e5e7eb', 'transform': 'translateY(0)', 'box-shadow': '0 2px 4px rgba(0,0,0,0.1)'}); }
                 );
             },
@@ -311,7 +311,7 @@ $(function() {
             $('#search-container-' + position).show(); // Show search if none selected
         } else {
             let html = candidates.map(c => `
-                <div class="selected-candidate" style="border: 2px solid #7c3aed; border-radius: 12px; padding: 15px; margin-bottom: 12px; background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
+                <div class="selected-candidate" style="border: 2px solid #e11d48; border-radius: 12px; padding: 15px; margin-bottom: 12px; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);">
                     <div class="row">
                         <div class="col-md-2"><img src="${c.photo}" style="max-height: 60px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.src='images/profile.jpg'"></div>
                         <div class="col-md-8">
