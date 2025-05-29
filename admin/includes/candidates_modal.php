@@ -340,9 +340,6 @@ document.getElementById('convertVoters').addEventListener('click', function(){
   alert('Form submission logic goes here.');
 });
 </script>
-
-
-
 <!-- Edit -->
 <div class="modal fade" id="edit">
     <div class="modal-dialog">
