@@ -431,9 +431,5 @@ $(function() {
 });
 </script>
 
-<style>
-/* Your CSS unchanged, already has .alert-danger red styles */
-</style>
-
 </body>
 </html>
