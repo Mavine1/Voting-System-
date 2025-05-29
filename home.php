@@ -98,8 +98,8 @@
 
     <?php include 'includes/navbar.php'; ?>
      
-    <div class="content-wrapper" style="background-color: #ffffff">
-        <div class="container" style="background-color: #ffffff">
+    <div class="content-wrapper" style="background-color: rgba(255,255,255,0.95)">
+        <div class="container" style="background-color: rgba(255,255,255,0.95)">
 
             <!-- Main content -->
             <section class="content">
@@ -107,14 +107,14 @@
                     $parse = parse_ini_file('admin/config.ini', FALSE, INI_SCANNER_RAW);
                     $title = $parse['election_title'];
                 ?>
-                <h1 class="page-header text-center title" style="color: #1e40af;"><b><?php echo strtoupper($title); ?></b></h1>
+                <h1 class="page-header text-center title" style="color: #1e40af; font-size: 22px; font-family: Times;"><b><?php echo strtoupper($title); ?></b></h1>
                 <div class="row">
                     <div class="col-sm-10 col-sm-offset-1">
 
                         <?php
                             // Show session messages without manual close buttons
                             if(isset($_SESSION['error'])) {
-                                echo '<div class="alert alert-danger floating-alert" id="error-alert" style="background-color: #fef2f2; border-color: #fecaca; color: #dc2626;"><ul>';
+                                echo '<div class="alert alert-danger floating-alert" id="error-alert" style="background-color: #ef4444; border-color: #ef4444; color: #ffffff;"><ul>';
                                 foreach($_SESSION['error'] as $error) {
                                     echo "<li>$error</li>";
                                 }
@@ -123,18 +123,18 @@
                             }
 
                             if(isset($_SESSION['success'])) {
-                                echo '<div class="alert alert-success floating-alert" id="success-alert" style="background-color: #eff6ff; border-color: #bfdbfe; color: #1e40af;">';
+                                echo '<div class="alert alert-success floating-alert" id="success-alert" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff;">';
                                 echo "<h4><i class='icon fa fa-check'></i> Success!</h4>{$_SESSION['success']}";
                                 echo '</div>';
                                 unset($_SESSION['success']);
                             }
                         ?>
 
-                        <div class="alert alert-danger floating-alert" id="alert" style="display:none; background-color: #fef2f2; border-color: #fecaca; color: #dc2626;">
+                        <div class="alert alert-danger floating-alert" id="alert" style="display:none; background-color: #ef4444; border-color: #ef4444; color: #ffffff;">
                             <span class="message"></span>
                         </div>
 
-                        <div class="alert alert-info floating-alert" id="info-alert" style="display:none; background-color: #eff6ff; border-color: #bfdbfe; color: #1e40af;">
+                        <div class="alert alert-info floating-alert" id="info-alert" style="display:none; background-color: #1e40af; border-color: #1e40af; color: #ffffff;">
                             <span class="info-message"></span>
                         </div>
 
@@ -143,9 +143,9 @@
                             $vquery = $conn->query($sql);
                             if($vquery->num_rows > 0){
                                 ?>
-                                <div class="text-center" style="color: #1e40af; font-size: 35px; font-family: Arial, sans-serif;">
+                                <div class="text-center" style="color: #1e40af; font-size: 22px; font-family: Times;">
                                     <h3>You have already voted for this election.</h3>
-                                    <a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: white; font-size: 22px; font-family: Arial, sans-serif;">View Ballot</a>
+                                    <a href="#view" data-toggle="modal" class="btn btn-primary btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; font-size: 12px; font-family: Times;">View Ballot</a>
                                 </div>
                                 <?php
                             } else {
@@ -162,19 +162,19 @@
                                             ?>
                                             <div class="row">
                                                 <div class="col-xs-12">
-                                                    <div class="box" style="background-color: #ffffff; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.1);" id="<?php echo $row['id']; ?>">
-                                                        <div class="box-header with-border" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); border-radius: 10px 10px 0 0; padding: 20px;">
-                                                            <h3 class="box-title" style="color: #ffffff; font-weight: bold; margin: 0;"><?php echo htmlspecialchars($row['description']); ?></h3>
+                                                    <div class="box" style="background-color: rgba(255,255,255,0.95); border: 2px solid #1e40af; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3);" id="<?php echo $row['id']; ?>">
+                                                        <div class="box-header with-border" style="background-color: #1e40af; border-radius: 8px 8px 0 0; padding: 20px;">
+                                                            <h3 class="box-title" style="color: #ffffff; font-weight: bold; margin: 0; font-size: 22px; font-family: Times;"><?php echo htmlspecialchars($row['description']); ?></h3>
                                                         </div>
                                                         <div class="box-body" style="padding: 25px;">
-                                                            <p style="color: #4b5563; margin-bottom: 20px; font-size: 16px;"><?php echo $instruct; ?></p>
+                                                            <p style="color: #1e40af; margin-bottom: 20px; font-size: 16px; font-family: Times;"><?php echo $instruct; ?></p>
                                                             <!-- Search Container -->
                                                             <div class="search-container" id="search-container-<?php echo $row['id']; ?>" style="margin-bottom: 25px;">
                                                                 <div class="input-group">
-                                                                    <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #d1d5db; border-radius: 25px 0 0 25px; padding: 12px 18px; font-size: 16px; transition: border-color 0.3s ease;" 
+                                                                    <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #1e40af; border-radius: 5px 0 0 5px; padding: 12px 18px; font-size: 16px; color: #1e40af; transition: border-color 0.3s ease;" 
                                                                         data-position="<?php echo $row['id']; ?>" data-slug="<?php echo $slug; ?>" data-max-vote="<?php echo $row['max_vote']; ?>">
                                                                     <span class="input-group-btn">
-                                                                        <button class="btn btn-primary search-btn" type="button" style="background: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 0 25px 25px 0; padding: 12px 24px;">
+                                                                        <button class="btn btn-primary search-btn" type="button" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 0 5px 5px 0; padding: 12px 24px; font-size: 12px; font-family: Times;">
                                                                             Search
                                                                         </button>
                                                                     </span>
@@ -183,15 +183,15 @@
 
                                                             <!-- Search Results -->
                                                             <div class="search-results" id="results_<?php echo $row['id']; ?>" style="display: none;">
-                                                                <h5 style="color: #1e40af; margin-bottom: 18px; font-weight: 600;">Search Results:</h5>
+                                                                <h5 style="color: #1e40af; margin-bottom: 18px; font-weight: 600; font-size: 22px; font-family: Times;">Search Results:</h5>
                                                                 <div class="candidates-list"></div>
                                                             </div>
 
                                                             <!-- Selected Candidates -->
                                                             <div class="selected-candidates" id="selected_<?php echo $row['id']; ?>">
-                                                                <h5 style="color: #1e40af; margin-bottom: 18px; font-weight: 600;">Selected Candidates:</h5>
-                                                                <div class="selected-list" style="min-height: 60px; border: 2px dashed #d1d5db; padding: 20px; border-radius: 12px; background-color: #f9fafb;">
-                                                                    <p class="text-muted text-center" style="margin: 0; color: #9ca3af;">No candidates selected yet</p>
+                                                                <h5 style="color: #1e40af; margin-bottom: 18px; font-weight: 600; font-size: 22px; font-family: Times;">Selected Candidates:</h5>
+                                                                <div class="selected-list" style="min-height: 60px; border: 2px dashed #1e40af; padding: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.95);">
+                                                                    <p class="text-muted text-center" style="margin: 0; color: #1e40af; font-family: Times;">No candidates selected yet</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -202,8 +202,8 @@
                                         }
                                     ?>
                                     <div class="text-center" style="margin-top: 40px;">
-                                        <button type="button" class="btn btn-info btn-lg" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); border-color: #1e40af; color: white; margin-right: 20px; border-radius: 25px; padding: 12px 35px; font-size: 16px; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
-                                        <button type="submit" class="btn btn-success btn-lg" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); border-color: #1e40af; color: white; border-radius: 25px; padding: 12px 35px; font-size: 16px; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
+                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
                                     </div>
                                 </form>
                                 <!-- End Voting Ballot -->
@@ -241,21 +241,21 @@ $(function() {
 
         if (type === 'success') {
             $(alertId).css({
-                'background-color': '#eff6ff',
-                'border-color': '#bfdbfe',
-                'color': '#1e40af'
+                'background-color': '#1e40af',
+                'border-color': '#1e40af',
+                'color': '#ffffff'
             });
         } else if (type === 'warning') {
             $(alertId).css({
-                'background-color': '#fef3c7',
-                'border-color': '#fcd34d',
-                'color': '#d97706'
+                'background-color': '#f59e0b',
+                'border-color': '#f59e0b',
+                'color': '#ffffff'
             });
         } else {
             $(alertId).css({
-                'background-color': '#fef2f2',
-                'border-color': '#fecaca',
-                'color': '#dc2626'
+                'background-color': '#ef4444',
+                'border-color': '#ef4444',
+                'color': '#ffffff'
             });
         }
 
@@ -283,7 +283,7 @@ $(function() {
 
         if (val.length < 2) {
             $results.hide();
-            $(this).css('border-color', '#d1d5db');
+            $(this).css('border-color', '#1e40af');
             return;
         }
 
@@ -298,11 +298,11 @@ $(function() {
             timeout: 10000,
             success: function(resp) {
                 if (!Array.isArray(resp)) {
-                    $list.html('<p class="text-center" style="color: #dc2626;">Invalid response</p>');
+                    $list.html('<p class="text-center" style="color: #ef4444;">Invalid response</p>');
                     return;
                 }
                 if (resp.length === 0) {
-                    $list.html('<p class="text-center" style="color: #9ca3af;"><i class="fa fa-search"></i> No candidates found</p>');
+                    $list.html('<p class="text-center" style="color: #1e40af;"><i class="fa fa-search"></i> No candidates found</p>');
                     return;
                 }
 
@@ -313,15 +313,15 @@ $(function() {
                         <div class="candidate-item" data-candidate-id="${c.id}" data-firstname="${c.firstname}"
                              data-lastname="${c.lastname}" data-photo="${photo}" data-platform="${platform}"
                              data-position="${posId}" data-slug="${slug}" data-max-vote="${maxVote}"
-                             style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: #ffffff; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(30,64,175,0.1);">
+                             style="border: 2px solid #1e40af; border-radius: 10px; padding: 20px; margin-bottom: 15px; background: rgba(255,255,255,0.95); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3);">
                             <div class="row">
                                 <div class="col-md-3"><img src="${photo}" style="max-height: 100px; width: 100%; object-fit: cover; border-radius: 10px;" onerror="this.src='images/profile.jpg'"></div>
                                 <div class="col-md-6">
-                                    <h5 style="color: #374151; font-weight: 600; margin-bottom: 8px;">${c.firstname} ${c.lastname}</h5>
-                                    <p style="color: #6b7280; font-size: 14px; line-height: 1.4;">${platform.substring(0,100)}${platform.length > 100 ? '...' : ''}</p>
+                                    <h5 style="color: #1e40af; font-weight: 600; margin-bottom: 8px; font-size: 22px; font-family: Times;">${c.firstname} ${c.lastname}</h5>
+                                    <p style="color: #1e40af; font-size: 14px; line-height: 1.4; font-family: Times;">${platform.substring(0,100)}${platform.length > 100 ? '...' : ''}</p>
                                 </div>
                                 <div class="col-md-3 text-center">
-                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); border-color: #1e40af; border-radius: 20px; width: 100%; padding: 8px 16px; font-weight: 600;"><i class="fa fa-check"></i> Select</button>
+                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #1e40af; border-color: #1e40af; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
                                 </div>
                             </div>
                         </div>`;
@@ -330,8 +330,8 @@ $(function() {
 
                 // Add hover effects
                 $('.candidate-item').hover(
-                    function() { $(this).css({'border-color': '#1e40af', 'transform': 'translateY(-2px)', 'box-shadow': '0 4px 12px rgba(30, 64, 175, 0.15)'}); },
-                    function() { $(this).css({'border-color': '#e5e7eb', 'transform': 'translateY(0)', 'box-shadow': '0 2px 4px rgba(30,64,175,0.1)'}); }
+                    function() { $(this).css({'border-color': '#3b82f6', 'transform': 'translateY(-2px)', 'box-shadow': '0 12px 40px rgba(30, 64, 175, 0.4)'}); },
+                    function() { $(this).css({'border-color': '#1e40af', 'transform': 'translateY(0)', 'box-shadow': '0 8px 32px rgba(30, 64, 175, 0.3)'}); }
                 );
             },
             error: function(xhr, status) {
@@ -339,7 +339,7 @@ $(function() {
                 if (status === 'timeout') errMsg += 'Request timed out. Please try again.';
                 else if (status === 'error') errMsg += 'Server error. Please try later.';
                 else errMsg += 'Check connection and try again.';
-                $list.html('<p class="text-center" style="color: #dc2626;">' + errMsg + '</p>');
+                $list.html('<p class="text-center" style="color: #ef4444;">' + errMsg + '</p>');
                 showAlert(errMsg);
             }
         });
@@ -347,7 +347,7 @@ $(function() {
 
     // Remove focus styling when input loses focus
     $('.candidate-search').on('blur', function() {
-        $(this).css('border-color', '#d1d5db');
+        $(this).css('border-color', '#1e40af');
     });
 
     // Select candidate handler
@@ -400,19 +400,19 @@ $(function() {
         let candidates = selectedCandidates[position] || [];
 
         if (candidates.length === 0) {
-            $container.html('<p class="text-center" style="margin: 0; color: #9ca3af;">No candidates selected yet</p>');
+            $container.html('<p class="text-center" style="margin: 0; color: #1e40af; font-family: Times;">No candidates selected yet</p>');
             $('#search-container-' + position).show(); // Show search if none selected
         } else {
             let html = candidates.map(c => `
-                <div class="selected-candidate" style="border: 2px solid #1e40af; border-radius: 12px; padding: 15px; margin-bottom: 12px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                <div class="selected-candidate" style="border: 2px solid #1e40af; border-radius: 10px; padding: 15px; margin-bottom: 12px; background: rgba(255,255,255,0.95);">
                     <div class="row">
                         <div class="col-md-2"><img src="${c.photo}" style="max-height: 60px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.src='images/profile.jpg'"></div>
                         <div class="col-md-8">
-                            <h6 style="color: #374151; margin: 0; font-weight: 600; margin-bottom: 4px;">${c.firstname} ${c.lastname}</h6>
-                            <p style="color: #6b7280; margin: 0; font-size: 14px; line-height: 1.3;">${c.platform.substring(0,50)}${c.platform.length > 50 ? '...' : ''}</p>
+                            <h6 style="color: #1e40af; margin: 0; font-weight: 600; margin-bottom: 4px; font-size: 22px; font-family: Times;">${c.firstname} ${c.lastname}</h6>
+                            <p style="color: #1e40af; margin: 0; font-size: 14px; line-height: 1.3; font-family: Times;">${c.platform.substring(0,50)}${c.platform.length > 50 ? '...' : ''}</p>
                         </div>
                         <div class="col-md-2 text-right">
-                            <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${position}" data-candidate-id="${c.id}" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border-color: #dc2626; border-radius: 15px; padding: 6px 10px;" title="Remove candidate">
+                            <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${position}" data-candidate-id="${c.id}" style="background-color: #ef4444; border-color: #ef4444; border-radius: 5px; padding: 6px 10px; color: #ffffff; font-size: 12px; font-family: Times;" title="Remove candidate">
                                 <i class="fa fa-times"></i>
                             </button>
                         </div>
