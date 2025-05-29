@@ -142,7 +142,7 @@ if (isset($_SESSION['admin'])) {
 
 				<div class="form-group has-feedback" style="position: relative;">
 					<input type="password" class="form-control" name="password" id="password" placeholder="Password" required style="border: 2px solid #1e40af; border-radius: 5px; color: #1e40af;">
-					<span class="glyphicon glyphicon-lock form-control-feedback" style="color: #1e40af;"></span>
+					<span style="color: #1e40af;"></span>
 					<span class="password-toggle" onclick="togglePassword()">
 						<i class="fa fa-eye" id="eye-icon"></i>
 					</span>
