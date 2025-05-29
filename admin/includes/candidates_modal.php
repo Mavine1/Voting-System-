@@ -106,7 +106,6 @@
 
           <!-- Search Results -->
           <div id="voterSearchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
-            <!-- Search results will be injected here -->
             <p class="text-muted text-center">Search results will appear here</p>
           </div>
 
@@ -167,6 +166,150 @@
     </form>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+  let selectedVoters = new Set();
+
+  // Function to perform voter search
+  function searchVoters(query) {
+    if (query.length < 2) {
+      $('#voterSearchResults').html('<p class="text-muted text-center">Enter at least 2 characters to search.</p>');
+      return;
+    }
+
+    // Show loading indicator
+    $('#voterSearchResults').html('<p class="text-muted text-center"><i class="fa fa-spinner fa-spin"></i> Searching voters...</p>');
+
+    // Simulate AJAX call with direct database query (since we're embedding in modal)
+    $.ajax({
+      url: 'includes/search_voters_embedded.php', // We'll create this
+      method: 'POST',
+      data: { search: query },
+      dataType: 'json',
+      success: function(data) {
+        if (data.error) {
+          $('#voterSearchResults').html(`<p class="text-danger">${data.error}</p>`);
+        } else {
+          renderVoters(data);
+        }
+      },
+      error: function() {
+        $('#voterSearchResults').html('<p class="text-danger">Error searching voters. Please try again.</p>');
+      }
+    });
+  }
+
+  // Debounce the search function
+  const debouncedSearch = _.debounce(searchVoters, 300);
+
+  // Update hidden input with selected voters CSV
+  function updateSelectedVotersInput() {
+    $('#selectedVotersInput').val(Array.from(selectedVoters).join(','));
+  }
+
+  // Render voters search results
+  function renderVoters(voters) {
+    const container = $('#voterSearchResults');
+    container.empty();
+
+    if (voters.length === 0) {
+      container.append('<p class="text-muted text-center">No voters found matching your search.</p>');
+      return;
+    }
+
+    const listGroup = $('<div class="list-group"></div>');
+    
+    voters.forEach(voter => {
+      const isSelected = selectedVoters.has(voter.id.toString());
+      const photo = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
+      
+      const voterItem = $(`
+        <div class="list-group-item" style="padding: 10px; border-radius: 5px; margin-bottom: 5px;">
+          <div class="d-flex align-items-center">
+            <input type="checkbox" class="voter-checkbox" id="voter_${voter.id}" value="${voter.id}" 
+              ${isSelected ? 'checked' : ''} style="margin-right: 10px;">
+            <img src="${photo}" alt="Photo" style="height:40px; width:40px; border-radius:50%; object-fit:cover; margin-right:10px;">
+            <div>
+              <h5 style="margin: 0; font-weight: bold;">${voter.firstname} ${voter.lastname}</h5>
+              <small class="text-muted">Voter ID: ${voter.id}</small>
+            </div>
+          </div>
+        </div>
+      `);
+      
+      listGroup.append(voterItem);
+    });
+    
+    container.append(listGroup);
+  }
+
+  // Search input event
+  $('#voterSearch').on('input', function() {
+    if ($('#addAllVoters').is(':checked')) return;
+    debouncedSearch($(this).val().trim());
+  });
+
+  // Handle checkbox changes
+  $('#voterSearchResults').on('change', '.voter-checkbox', function() {
+    const voterId = $(this).val();
+    if ($(this).is(':checked')) {
+      selectedVoters.add(voterId);
+    } else {
+      selectedVoters.delete(voterId);
+    }
+    updateSelectedVotersInput();
+  });
+
+  // Handle "Add All Voters" checkbox
+  $('#addAllVoters').change(function() {
+    if ($(this).is(':checked')) {
+      $('#voterSearch').prop('disabled', true);
+      $('#voterSearchResults').html('<p class="text-info">All voters will be converted.</p>');
+      selectedVoters.clear();
+      updateSelectedVotersInput();
+    } else {
+      $('#voterSearch').prop('disabled', false);
+      $('#voterSearch').trigger('input');
+    }
+  });
+
+  // Form validation
+  $('#convertVoterForm').submit(function(e) {
+    if (!$('#positionSelect').val()) {
+      e.preventDefault();
+      alert('Please select a position for the candidates.');
+      return false;
+    }
+    
+    if (!selectedVoters.size && !$('#addAllVoters').is(':checked')) {
+      e.preventDefault();
+      alert('Please select at least one voter to convert or check "Convert ALL voters".');
+      return false;
+    }
+    
+    return true;
+  });
+
+  // Reset modal when closed
+  $('#convertVoters').on('hidden.bs.modal', function() {
+    selectedVoters.clear();
+    updateSelectedVotersInput();
+    $('#voterSearch').val('').prop('disabled', false);
+    $('#voterSearchResults').html('<p class="text-muted text-center">Search results will appear here</p>');
+    $('#addAllVoters').prop('checked', false);
+    $('#positionSelect').val('');
+    $('#platformDesc').val('');
+    $('#candidatePhoto').val('');
+  });
+});
+</script>
+
+<?php
+// Create a new file called includes/search_voters_embedded.php with this content:
+/*
+
+?>
 
 <script>
 $(document).ready(function() {
