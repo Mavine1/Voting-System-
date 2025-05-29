@@ -1,93 +1,93 @@
-<!-- Description -->
-<div class="modal fade" id="platform">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: #d8d1bd ;color:black ; font-size: 15px; font-family:Times ">
-            <div class="modal-header">
-              <button type="button" class=" btn btn-close btn-curve pull-right"  data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b><span class="fullname"></span></b></h4>
-            </div>
-            <div class="modal-body">
-                <p id="desc"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-curve pull-left" style='background-color:  #FFDEAD  ;color:black ; font-size: 12px; font-family:Times' data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-            </div>
-        </div>
+<!-- Description Modal -->
+<div class="modal fade" id="platform" tabindex="-1" role="dialog" aria-labelledby="platformLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
+      <div class="modal-header">
+        <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><b><span class="fullname"></span></b></h4>
+      </div>
+      <div class="modal-body">
+        <p id="desc"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+          <i class="fa fa-close"></i> Close
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Add -->
-<div class="modal fade" id="addnew">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: #d8d1bd ;color:black ; font-size: 15px; font-family:Times ">
-            <div class="modal-header">
-              <button type="button" class=" btn btn-close btn-curve pull-right"  data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b>Add New Candidate</b></h4>
+<!-- Add New Candidate Modal -->
+<div class="modal fade" id="addnew" tabindex="-1" role="dialog" aria-labelledby="addNewLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
+      <div class="modal-header">
+        <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><b>Add New Candidate</b></h4>
+      </div>
+      <form class="form-horizontal" method="POST" action="candidates_add.php" enctype="multipart/form-data" autocomplete="off">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="firstname" class="col-sm-3 control-label">Firstname</label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="firstname" name="firstname" required>
             </div>
-            <div class="modal-body">
-              <form class="form-horizontal" method="POST" action="candidates_add.php" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="firstname" class="col-sm-3 control-label">Firstname</label>
-
-                    <div class="col-sm-9">
-                      <input type="text" class="form-control" id="firstname" name="firstname" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="lastname" class="col-sm-3 control-label">Lastname</label>
-
-                    <div class="col-sm-9">
-                      <input type="text" class="form-control" id="lastname" name="lastname" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="position" class="col-sm-3 control-label">Position</label>
-
-                    <div class="col-sm-9">
-                      <select class="form-control" id="position" name="position" required>
-                        <option value="" selected>- Select -</option>
-                        <?php
-                          $sql = "SELECT * FROM positions";
-                          $query = $conn->query($sql);
-                          while($row = $query->fetch_assoc()){
-                            echo "
-                              <option value='".$row['id']."'>".$row['description']."</option>
-                            ";
-                          }
-                        ?>
-                      </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="photo" class="col-sm-3 control-label">Photo</label>
-
-                    <div class="col-sm-9">
-                      <input type="file" id="photo" name="photo">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="platform" class="col-sm-3 control-label">Platform</label>
-
-                    <div class="col-sm-9">
-                      <textarea class="form-control" id="platform" name="platform" rows="7"></textarea>
-                    </div>
-                </div>
+          </div>
+          <div class="form-group">
+            <label for="lastname" class="col-sm-3 control-label">Lastname</label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="lastname" name="lastname" required>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-curve pull-left"style='background-color:  #FFDEAD  ;color:black ; font-size: 12px; font-family:Times' data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-              <button type="submit" class="btn btn-primary btn-curve" style='background-color: #9CD095 ;color:black ; font-size: 12px; font-family:Times'name="add"><i class="fa fa-save"></i> Save</button>
-              </form>
+          </div>
+          <div class="form-group">
+            <label for="position" class="col-sm-3 control-label">Position</label>
+            <div class="col-sm-9">
+              <select class="form-control" id="position" name="position" required>
+                <option value="" selected>- Select -</option>
+                <?php
+                  $sql = "SELECT * FROM positions";
+                  $query = $conn->query($sql);
+                  while($row = $query->fetch_assoc()){
+                    echo "<option value='".$row['id']."'>".htmlspecialchars($row['description'])."</option>";
+                  }
+                ?>
+              </select>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="photo" class="col-sm-3 control-label">Photo</label>
+            <div class="col-sm-9">
+              <input type="file" id="photo" name="photo" accept="image/*">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="platform" class="col-sm-3 control-label">Platform</label>
+            <div class="col-sm-9">
+              <textarea class="form-control" id="platform" name="platform" rows="7"></textarea>
+            </div>
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="submit" name="add" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
+            <i class="fa fa-save"></i> Save
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-<!-- Convert Voters Modal -->
 <!-- Convert Voters Modal -->
 <div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document" >
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
       <div class="modal-header">
         <h4 class="modal-title" id="convertVotersLabel"><b>Convert Voters to Candidates</b></h4>
@@ -97,28 +97,21 @@
       </div>
       <form id="convertVotersForm" autocomplete="off" onsubmit="return false;">
         <div class="modal-body">
-          <!-- Convert All Voters Checkbox -->
           <div class="form-group">
             <input type="checkbox" id="convertAllVoters" name="convert_all" value="1">
             <label for="convertAllVoters"><strong>Convert All Voters</strong></label>
           </div>
-
-          <!-- Search Box -->
           <div class="form-group" id="searchGroup">
             <label for="voterSearch">Search Voters by Name</label>
             <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off" required>
             <div id="searchResults" style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ccc; display:none; position: relative; z-index: 1050;"></div>
           </div>
-
-          <!-- Selected Voters List -->
           <div class="form-group" id="selectedGroup">
             <label><strong>Selected Voters</strong></label>
             <div id="selectedVotersList" style="min-height: 80px; border: 1px solid #ccc; padding: 10px; background: white;">
               <small>No voters selected</small>
             </div>
           </div>
-
-          <!-- Position Select -->
           <div class="form-group">
             <label for="convertPosition">Select Position</label>
             <select class="form-control" id="convertPosition" name="position" required>
@@ -132,17 +125,12 @@
               ?>
             </select>
           </div>
-
-          <!-- Platform Description -->
           <div class="form-group">
             <label for="convertPlatform">Platform Description</label>
             <textarea class="form-control" id="convertPlatform" name="platform" rows="5" placeholder="Enter platform description..." required></textarea>
           </div>
-
-          <!-- Hidden input to hold selected voter IDs -->
           <input type="hidden" id="selectedVotersInput" name="voters" value="">
         </div>
-
         <div class="modal-footer">
           <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
             <i class="fa fa-close"></i> Close
@@ -158,7 +146,7 @@
 
 <script>
 (() => {
-  // Replace with your PHP-generated voters data
+  // PHP-generated voters data:
   const voters = [
     <?php
       $sql = "SELECT id, firstname, lastname, photo FROM voters ORDER BY firstname, lastname";
@@ -256,7 +244,6 @@
 
   convertAllCheckbox.addEventListener('change', () => {
     if (convertAllCheckbox.checked) {
-      // Hide and disable search & selection
       searchGroup.style.display = 'none';
       selectedGroup.style.display = 'none';
       voterSearch.value = '';
@@ -292,7 +279,6 @@
       alert('Please enter a platform description.');
       return;
     }
-    // Proceed without alert if convertAll is unchecked and no voters selected
 
     const data = new FormData();
     data.append('convert_all', convertAll ? '1' : '0');
@@ -304,192 +290,138 @@
       method: 'POST',
       body: data,
     })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          alert(result.message || 'Voters converted successfully.');
-          location.reload();
-        } else {
-          alert(result.error || 'Error converting voters.');
-        }
-      })
-      .catch(err => {
-        alert('AJAX error: ' + err);
-      });
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        alert(result.message || 'Voters converted successfully.');
+        location.reload();
+      } else {
+        alert(result.error || 'Error converting voters.');
+      }
+    })
+    .catch(err => {
+      alert('AJAX error: ' + err);
+    });
   });
 
-  // Initial setup
   renderSelectedVoters();
 })();
 </script>
 
-<script>
-
-document.getElementById('convertVotersBtn').addEventListener('click', function() {
-  // Get values
-  const convertAll = document.getElementById('convertAllVoters').checked;
-  const position = document.getElementById('convertPosition').value;
-  const platform = document.getElementById('convertPlatform').value.trim();
-  const selectedVoters = document.getElementById('selectedVotersInput').value;
-
-  // Validation
-  if (!position) {
-    alert('Please select a position.');
-    return;
-  }
-  if (!platform) {
-    alert('Please enter a platform description.');
-    return;
-  }
-  if (!convertAll && (!selectedVoters || selectedVoters.trim() === '')) {
-    alert('Please select voters or check "Convert All Voters".');
-    return;
-  }
-
-  // Prepare data
-  const data = new FormData();
-  data.append('convert_all', convertAll ? '1' : '0');
-  data.append('position', position);
-  data.append('platform', platform);
-  if (!convertAll) data.append('voters', selectedVoters);
-
-  // AJAX request
-  fetch('candidates_convert.php', {
-    method: 'POST',
-    body: data,
-  })
-  .then(response => response.json())
-  .then(result => {
-    if(result.success) {
-      alert(result.message || 'Voters converted successfully.');
-      // Optionally refresh page or UI
-      location.reload();
-    } else {
-      alert(result.error || 'Error converting voters.');
-    }
-  })
-  .catch(err => {
-    alert('AJAX error: ' + err);
-  });
-});
-</script>
-
-<!-- Edit -->
-<div class="modal fade" id="edit">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: #d8d1bd ;color:black ; font-size: 15px; font-family:Times ">
-            <div class="modal-header">
-              <button type="button" class=" btn btn-close btn-curve pull-right"  data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b>Edit Voter</b></h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal" method="POST" action="candidates_edit.php">
-                <input type="hidden" class="id" name="id">
-                <div class="form-group">
-                    <label for="edit_firstname" class="col-sm-3 control-label">Firstname</label>
-
-                    <div class="col-sm-9">
-                      <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="edit_lastname" class="col-sm-3 control-label">Lastname</label>
-
-                    <div class="col-sm-9">
-                      <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="edit_position" class="col-sm-3 control-label">Position</label>
-
-                    <div class="col-sm-9">
-                      <select class="form-control" id="edit_position" name="position" required>
-                        <option value="" selected id="posselect"></option>
-                        <?php
-                          $sql = "SELECT * FROM positions";
-                          $query = $conn->query($sql);
-                          while($row = $query->fetch_assoc()){
-                            echo "
-                              <option value='".$row['id']."'>".$row['description']."</option>
-                            ";
-                          }
-                        ?>
-                      </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="edit_platform" class="col-sm-3 control-label">Platform</label>
-
-                    <div class="col-sm-9">
-                      <textarea class="form-control" id="edit_platform" name="platform" rows="7"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-curve pull-left"style='background-color:  #FFDEAD  ;color:black ; font-size: 12px; font-family:Times' data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-              <button type="submit" class="btn btn-success btn-curve"style='background-color: #9CD095 ;color:black ; font-size: 12px; font-family:Times' name="edit"><i class="fa fa-check-square-o"></i> Update</button>
-              </form>
-            </div>
+<!-- Edit Candidate Modal -->
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="editLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
+      <div class="modal-header">
+        <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><b>Edit Voter</b></h4>
+      </div>
+      <form class="form-horizontal" method="POST" action="candidates_edit.php" autocomplete="off">
+        <input type="hidden" class="id" name="id">
+        <div class="form-group">
+          <label for="edit_firstname" class="col-sm-3 control-label">Firstname</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
+          </div>
         </div>
+        <div class="form-group">
+          <label for="edit_lastname" class="col-sm-3 control-label">Lastname</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit_position" class="col-sm-3 control-label">Position</label>
+          <div class="col-sm-9">
+            <select class="form-control" id="edit_position" name="position" required>
+              <option value="" selected id="posselect"></option>
+              <?php
+                $sql = "SELECT * FROM positions";
+                $query = $conn->query($sql);
+                while ($row = $query->fetch_assoc()) {
+                  echo "<option value='" . $row['id'] . "'>" . htmlspecialchars($row['description']) . "</option>";
+                }
+              ?>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit_platform" class="col-sm-3 control-label">Platform</label>
+          <div class="col-sm-9">
+            <textarea class="form-control" id="edit_platform" name="platform" rows="7"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="submit" name="edit" class="btn btn-success btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
+            <i class="fa fa-check-square-o"></i> Update
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-<!-- Delete -->
-<div class="modal fade" id="delete">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: #d8d1bd ;color:black ; font-size: 15px; font-family:Times ">
-            <div class="modal-header">
-              <button type="button" class=" btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b>Deleting...</b></h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal" method="POST" action="candidates_delete.php">
-                <input type="hidden" class="id" name="id">
-                <div class="text-center">
-                    <p>DELETE CANDIDATE</p>
-                    <h2 class="bold fullname"></h2>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-curve pull-left"style='background-color:  #FFDEAD  ;color:black ; font-size: 12px; font-family:Times' data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-              <button type="submit" class="btn btn-danger btn-curve" style='background-color: #ff8e88 ;color:black ; font-size: 12px; font-family:Times'name="delete"><i class="fa fa-trash"></i> Delete</button>
-              </form>
-            </div>
+<!-- Delete Candidate Modal -->
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
+      <div class="modal-header">
+        <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><b>Deleting...</b></h4>
+      </div>
+      <form class="form-horizontal" method="POST" action="candidates_delete.php" autocomplete="off">
+        <input type="hidden" class="id" name="id">
+        <div class="text-center">
+          <p>DELETE CANDIDATE</p>
+          <h2 class="bold fullname"></h2>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="submit" name="delete" class="btn btn-danger btn-curve" style="background-color: #ff8e88; color:black; font-size: 12px; font-family: Times;">
+            <i class="fa fa-trash"></i> Delete
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-<!-- Update Photo -->
-<div class="modal fade" id="edit_photo">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: #d8d1bd ;color:black ; font-size: 15px; font-family:Times ">
-            <div class="modal-header">
-              <button type="button" class=" btn btn-close btn-curve pull-right"  data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b><span class="fullname"></span></b></h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal" method="POST" action="candidates_photo.php" enctype="multipart/form-data">
-                <input type="hidden" class="id" name="id">
-                <div class="form-group">
-                    <label for="photo" class="col-sm-3 control-label">Photo</label>
-
-                    <div class="col-sm-9">
-                      <input type="file" id="photo" name="photo" required>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-curve pull-left"style='background-color:  #FFDEAD  ;color:black ; font-size: 12px; font-family:Times' data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-              <button type="submit" class="btn btn-success btn-curve"style='background-color: #9CD095 ;color:black ; font-size: 12px; font-family:Times' name="upload"><i class="fa fa-check-square-o"></i> Update</button>
-              </form>
-            </div>
+<!-- Update Photo Modal -->
+<div class="modal fade" id="edit_photo" tabindex="-1" role="dialog" aria-labelledby="editPhotoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
+      <div class="modal-header">
+        <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><b><span class="fullname"></span></b></h4>
+      </div>
+      <form class="form-horizontal" method="POST" action="candidates_photo.php" enctype="multipart/form-data" autocomplete="off">
+        <input type="hidden" class="id" name="id">
+        <div class="form-group">
+          <label for="photo" class="col-sm-3 control-label">Photo</label>
+          <div class="col-sm-9">
+            <input type="file" id="photo" name="photo" required accept="image/*">
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="submit" name="upload" class="btn btn-success btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
+            <i class="fa fa-check-square-o"></i> Update
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
-
-
-
-     
