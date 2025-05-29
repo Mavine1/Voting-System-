@@ -52,7 +52,7 @@
                 <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close" style="background-color: #dc2626; color: #ffffff; border: none;">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" style="color: #059669; font-weight: bold; font-size: 18px;">
+                <h4 class="modal-title" style="color: #1e40af; font-weight: bold; font-size: 18px;">
                     <b>Your Votes</b>
                 </h4>
             </div>
@@ -63,9 +63,9 @@
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
                         echo "
-                            <div class='row votelist' style='margin-bottom: 10px; padding: 8px; border-bottom: 1px solid #059669;'>
-                                <span class='col-sm-4'><span class='pull-right' style='color: #059669; font-weight: bold;'><b>".$row['description']." :</b></span></span> 
-                                <span class='col-sm-8' style='color: #059669;'>".$row['canfirst']." ".$row['canlast']."</span>
+                            <div class='row votelist' style='margin-bottom: 10px; padding: 8px; border-bottom: 1px solid #1e40af;'>
+                                <span class='col-sm-4'><span class='pull-right' style='color: #1e40af; font-weight: bold;'><b>".$row['description']." :</b></span></span> 
+                                <span class='col-sm-8' style='color: #1e40af;'>".$row['canfirst']." ".$row['canlast']."</span>
                             </div>
                         ";
                     }
