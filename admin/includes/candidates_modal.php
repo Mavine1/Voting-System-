@@ -305,12 +305,6 @@ $(document).ready(function() {
 });
 </script>
 
-<?php
-// Create a new file called includes/search_voters_embedded.php with this content:
-/*
-
-?>
-
 <script>
 $(document).ready(function() {
   let selectedVoters = new Set();
