@@ -8,15 +8,15 @@
     <?php include 'includes/menubar.php'; ?>
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper" style="background-color:#F1E9D2 ">
+    <div class="content-wrapper" style="background-color:#ffffff">
       <!-- Content Header (Page header) -->
       <section class="content-header">
-        <h1><b>
+        <h1 style="color:#1e40af"><b>
             Candidates List
           </b> </h1>
-        <ol class="breadcrumb" style="color:black ; font-size: 17px; font-family:Times">
-          <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-          <li class="active" style="color:black ; font-size: 17px; font-family:Times">Dashboard</li>
+        <ol class="breadcrumb" style="color:#1e40af; font-size: 17px; font-family:Times">
+          <li><a href="#" style="color:#1e40af"><i class="fa fa-dashboard"></i> Home</a></li>
+          <li class="active" style="color:#1e40af; font-size: 17px; font-family:Times">Dashboard</li>
         </ol>
       </section>
       <!-- Main content -->
@@ -24,8 +24,8 @@
         <?php
         if (isset($_SESSION['error'])) {
           echo "
-            <div class='alert alert-danger alert-dismissible'>
-              <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+            <div class='alert alert-danger alert-dismissible' style='background-color:#ef4444; border-color:#ef4444; color:#ffffff;'>
+              <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color:#ffffff;'>&times;</button>
               <h4><i class='icon fa fa-warning'></i> Error!</h4>
               " . $_SESSION['error'] . "
             </div>
@@ -34,8 +34,8 @@
         }
         if (isset($_SESSION['success'])) {
           echo "
-            <div class='alert alert-success alert-dismissible'>
-              <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+            <div class='alert alert-success alert-dismissible' style='background-color:#1e40af; border-color:#1e40af; color:#ffffff;'>
+              <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color:#ffffff;'>&times;</button>
               <h4><i class='icon fa fa-check'></i> Success!</h4>
               " . $_SESSION['success'] . "
             </div>
@@ -45,16 +45,16 @@
         ?>
         <div class="row">
           <div class="col-xs-12">
-            <div class="box" style="background-color: #d8d1bd">
-              <div class="box-header with-border" style="background-color: #d8d1bd">
-                <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-curve" style="background-color: #4682B4 ;color:black ; font-size: 12px; font-family:Times"><i class="fa fa-plus"></i> New</a>
-                <a href="#convertVoters" data-toggle="modal" class="btn btn-info btn-sm btn-curve" style="background-color: #4CAF50; color:black ; font-size: 12px; font-family:Times">
+            <div class="box" style="background-color: #ffffff; border: 2px solid #1e40af;">
+              <div class="box-header with-border" style="background-color: #1e40af; color: #ffffff;">
+                <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-curve" style="background-color: #ffffff; color:#1e40af; border: 2px solid #1e40af; font-size: 12px; font-family:Times"><i class="fa fa-plus"></i> New</a>
+                <a href="#convertVoters" data-toggle="modal" class="btn btn-info btn-sm btn-curve" style="background-color: #ef4444; color:#ffffff; border: 2px solid #ef4444; font-size: 12px; font-family:Times">
                   <i class="fa fa-exchange-alt"></i> Convert Voters
                 </a>
               </div>
-              <div class="box-body">
-                <table id="example1" class="table ">
-                  <thead>
+              <div class="box-body" style="background-color: #ffffff;">
+                <table id="example1" class="table" style="background-color: #ffffff;">
+                  <thead style="background-color: #1e40af; color: #ffffff;">
                     <th class="hidden"></th>
                     <th>Position</th>
                     <th>Photo</th>
@@ -70,21 +70,21 @@
                     while ($row = $query->fetch_assoc()) {
                       $image = (!empty($row['photo'])) ? '../images/' . $row['photo'] : '../images/profile.jpg';
                       echo "
-                        <tr style='color:black ; font-size: 15px; font-family:Times'>
+                        <tr style='color:#1e40af; font-size: 15px; font-family:Times; background-color:#ffffff; border-bottom: 1px solid #1e40af;'>
                           <td class='hidden'></td>
                           <td>" . $row['description'] . "</td>
                           <td>
-                            <img src='" . $image . "' width='30px' height='30px'>
-                            <a href='#edit_photo' data-toggle='modal' class='pull-right photo' data-id='" . $row['canid'] . "'><span class='fa fa-edit'></span></a>
+                            <img src='" . $image . "' width='30px' height='30px' style='border: 2px solid #1e40af; border-radius: 50%;'>
+                            <a href='#edit_photo' data-toggle='modal' class='pull-right photo' data-id='" . $row['canid'] . "' style='color:#1e40af;'><span class='fa fa-edit'></span></a>
                           </td>
                           <td>" . $row['firstname'] . "</td>
                           <td>" . $row['lastname'] . "</td>
-                          <td><a href='#platform' data-toggle='modal' class='btn btn-info btn-sm btn-curve platform'  style='background-color: #00BFFF ;color:black ; font-size: 12px; font-family:Times' data-id='" . $row['canid'] . "'><i class='fa fa-search'></i> View</a></td>
+                          <td><a href='#platform' data-toggle='modal' class='btn btn-info btn-sm btn-curve platform' style='background-color: #1e40af; color:#ffffff; border: 2px solid #1e40af; font-size: 12px; font-family:Times' data-id='" . $row['canid'] . "'><i class='fa fa-search'></i> View</a></td>
                           <td>
                             
                             
-                            <button class='btn btn-success btn-sm edit btn-curve' style='background-color: #9CD095 ;color:black ; font-size: 12px; font-family:Times'  data-id='" . $row['canid'] . "' ><i class='fa fa-edit'></i> Edit</button>
-                            <button class='btn btn-danger btn-sm delete btn-curve' style='background-color:#ff8e88 ;color:black ; font-size: 12px; font-family:Times' data-id='" . $row['canid'] . "'><i class='fa fa-trash'></i> Delete</button>
+                            <button class='btn btn-success btn-sm edit btn-curve' style='background-color: #ffffff; color:#1e40af; border: 2px solid #1e40af; font-size: 12px; font-family:Times; margin-right: 5px;' data-id='" . $row['canid'] . "' ><i class='fa fa-edit'></i> Edit</button>
+                            <button class='btn btn-danger btn-sm delete btn-curve' style='background-color:#ef4444; color:#ffffff; border: 2px solid #ef4444; font-size: 12px; font-family:Times' data-id='" . $row['canid'] . "'><i class='fa fa-trash'></i> Delete</button>
 
                           </td>
                         </tr>
