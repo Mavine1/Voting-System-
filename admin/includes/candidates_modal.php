@@ -286,7 +286,7 @@
     data.append('platform', platform);
     if (!convertAll) data.append('voters', votersSelected);
 
-    fetch('candidates_convert.php', {
+    fetch('convert.php', {
       method: 'POST',
       body: data,
     })
