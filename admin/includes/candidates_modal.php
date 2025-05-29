@@ -95,7 +95,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form id="convertVotersForm" autocomplete="off" onsubmit="return false;">
+      <form id="convertVotersForm" method="POST" action="candidates_add.php" autocomplete="off">
         <div class="modal-body">
           <div class="form-group">
             <input type="checkbox" id="convertAllVoters" name="convert_all" value="1">
@@ -103,7 +103,7 @@
           </div>
           <div class="form-group" id="searchGroup">
             <label for="voterSearch">Search Voters by Name</label>
-            <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off" required>
+            <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off">
             <div id="searchResults" style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ccc; display:none; position: relative; z-index: 1050;"></div>
           </div>
           <div class="form-group" id="selectedGroup">
@@ -135,7 +135,7 @@
           <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
             <i class="fa fa-close"></i> Close
           </button>
-          <button type="button" id="convertVotersBtn" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
+          <button type="submit" name="convert_voters" id="convertVotersBtn" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
             <i class="fa fa-exchange"></i> Convert Selected
           </button>
         </div>
@@ -173,6 +173,7 @@
   const convertBtn = document.getElementById('convertVotersBtn');
   const searchGroup = document.getElementById('searchGroup');
   const selectedGroup = document.getElementById('selectedGroup');
+  const convertForm = document.getElementById('convertVotersForm');
 
   let selectedVoters = new Map();
 
@@ -256,7 +257,7 @@
       searchGroup.style.display = 'block';
       selectedGroup.style.display = 'block';
       voterSearch.disabled = false;
-      voterSearch.required = true;
+      voterSearch.required = false;
     }
   });
 
@@ -265,43 +266,31 @@
     filterVoters(e.target.value);
   });
 
-  convertBtn.addEventListener('click', () => {
+  // Form validation before submit
+  convertForm.addEventListener('submit', (e) => {
     const convertAll = convertAllCheckbox.checked;
     const position = convertPosition.value;
     const platform = convertPlatform.value.trim();
     const votersSelected = selectedVotersInput.value;
 
     if (!position) {
+      e.preventDefault();
       alert('Please select a position.');
-      return;
+      return false;
     }
     if (!platform) {
+      e.preventDefault();
       alert('Please enter a platform description.');
-      return;
+      return false;
+    }
+    if (!convertAll && (!votersSelected || votersSelected.trim() === '')) {
+      e.preventDefault();
+      alert('Please select at least one voter or check "Convert All Voters".');
+      return false;
     }
 
-    const data = new FormData();
-    data.append('convert_all', convertAll ? '1' : '0');
-    data.append('position', position);
-    data.append('platform', platform);
-    if (!convertAll) data.append('voters', votersSelected);
-
-    fetch('convert.php', {
-      method: 'POST',
-      body: data,
-    })
-    .then(res => res.json())
-    .then(result => {
-      if (result.success) {
-        alert(result.message || 'Voters converted successfully.');
-        location.reload();
-      } else {
-        alert(result.error || 'Error converting voters.');
-      }
-    })
-    .catch(err => {
-      alert('AJAX error: ' + err);
-    });
+    // If everything is valid, the form will submit normally to candidates_add.php
+    return true;
   });
 
   renderSelectedVoters();
@@ -316,41 +305,43 @@
         <button type="button" class="btn btn-close btn-curve pull-right" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title"><b>Edit Voter</b></h4>
+        <h4 class="modal-title"><b>Edit Candidate</b></h4>
       </div>
       <form class="form-horizontal" method="POST" action="candidates_edit.php" autocomplete="off">
-        <input type="hidden" class="id" name="id">
-        <div class="form-group">
-          <label for="edit_firstname" class="col-sm-3 control-label">Firstname</label>
-          <div class="col-sm-9">
-            <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
+        <div class="modal-body">
+          <input type="hidden" class="id" name="id">
+          <div class="form-group">
+            <label for="edit_firstname" class="col-sm-3 control-label">Firstname</label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="edit_lastname" class="col-sm-3 control-label">Lastname</label>
-          <div class="col-sm-9">
-            <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
+          <div class="form-group">
+            <label for="edit_lastname" class="col-sm-3 control-label">Lastname</label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="edit_position" class="col-sm-3 control-label">Position</label>
-          <div class="col-sm-9">
-            <select class="form-control" id="edit_position" name="position" required>
-              <option value="" selected id="posselect"></option>
-              <?php
-                $sql = "SELECT * FROM positions";
-                $query = $conn->query($sql);
-                while ($row = $query->fetch_assoc()) {
-                  echo "<option value='" . $row['id'] . "'>" . htmlspecialchars($row['description']) . "</option>";
-                }
-              ?>
-            </select>
+          <div class="form-group">
+            <label for="edit_position" class="col-sm-3 control-label">Position</label>
+            <div class="col-sm-9">
+              <select class="form-control" id="edit_position" name="position" required>
+                <option value="" selected id="posselect"></option>
+                <?php
+                  $sql = "SELECT * FROM positions";
+                  $query = $conn->query($sql);
+                  while ($row = $query->fetch_assoc()) {
+                    echo "<option value='" . $row['id'] . "'>" . htmlspecialchars($row['description']) . "</option>";
+                  }
+                ?>
+              </select>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="edit_platform" class="col-sm-3 control-label">Platform</label>
-          <div class="col-sm-9">
-            <textarea class="form-control" id="edit_platform" name="platform" rows="7"></textarea>
+          <div class="form-group">
+            <label for="edit_platform" class="col-sm-3 control-label">Platform</label>
+            <div class="col-sm-9">
+              <textarea class="form-control" id="edit_platform" name="platform" rows="7"></textarea>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -378,9 +369,11 @@
       </div>
       <form class="form-horizontal" method="POST" action="candidates_delete.php" autocomplete="off">
         <input type="hidden" class="id" name="id">
-        <div class="text-center">
-          <p>DELETE CANDIDATE</p>
-          <h2 class="bold fullname"></h2>
+        <div class="modal-body">
+          <div class="text-center">
+            <p>DELETE CANDIDATE</p>
+            <h2 class="bold fullname"></h2>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
@@ -406,11 +399,13 @@
         <h4 class="modal-title"><b><span class="fullname"></span></b></h4>
       </div>
       <form class="form-horizontal" method="POST" action="candidates_photo.php" enctype="multipart/form-data" autocomplete="off">
-        <input type="hidden" class="id" name="id">
-        <div class="form-group">
-          <label for="photo" class="col-sm-3 control-label">Photo</label>
-          <div class="col-sm-9">
-            <input type="file" id="photo" name="photo" required accept="image/*">
+        <div class="modal-body">
+          <input type="hidden" class="id" name="id">
+          <div class="form-group">
+            <label for="photo" class="col-sm-3 control-label">Photo</label>
+            <div class="col-sm-9">
+              <input type="file" id="photo" name="photo" required accept="image/*">
+            </div>
           </div>
         </div>
         <div class="modal-footer">
