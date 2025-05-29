@@ -9,11 +9,14 @@ if (isset($_POST['add'])) {
     $platform = $conn->real_escape_string($_POST['platform']);
     $filename = $_FILES['photo']['name'];
 
+    // Handle photo upload
     if (!empty($filename)) {
         move_uploaded_file($_FILES['photo']['tmp_name'], '../images/' . $filename);
     }
 
-    $sql = "INSERT INTO candidates (position_id, firstname, lastname, photo, platform) VALUES ('$position', '$firstname', '$lastname', '$filename', '$platform')";
+    // Insert candidate into the database
+    $sql = "INSERT INTO candidates (position_id, firstname, lastname, photo, platform) 
+            VALUES ('$position', '$firstname', '$lastname', '$filename', '$platform')";
     if ($conn->query($sql)) {
         $_SESSION['success'] = 'Candidate added successfully';
     } else {
@@ -24,8 +27,8 @@ if (isset($_POST['add'])) {
     // Convert voters to candidates
     $position_id = intval($_POST['position']);
     $platform = $conn->real_escape_string($_POST['platform']);
-    $add_all = isset($_POST['add_all_voters']);
-    $selected_voters = isset($_POST['selected_voters']) ? $_POST['selected_voters'] : '';
+    $add_all = isset($_POST['add_all_voters']);  // Option to add all voters
+    $selected_voters = isset($_POST['selected_voters']) ? $_POST['selected_voters'] : '';  // Selected voters
 
     if (!$position_id) {
         $_SESSION['error'] = 'Please select a position.';
@@ -33,9 +36,11 @@ if (isset($_POST['add'])) {
         exit;
     }
 
-    // Prepare insert statement
-    $stmt = $conn->prepare("INSERT INTO candidates (position_id, firstname, lastname, photo, platform) VALUES (?, ?, ?, ?, ?)");
+    // Prepare insert statement for candidate conversion
+    $stmt = $conn->prepare("INSERT INTO candidates (position_id, firstname, lastname, photo, platform) 
+                            VALUES (?, ?, ?, ?, ?)");
 
+    // If adding all voters
     if ($add_all) {
         $voters = $conn->query("SELECT firstname, lastname, photo FROM voters");
     } else {
@@ -44,16 +49,18 @@ if (isset($_POST['add'])) {
             header('location: candidates.php');
             exit;
         }
-        // Convert comma-separated string to array of ints
+
+        // Convert comma-separated string to array of voter IDs
         $ids = array_map('intval', explode(',', $selected_voters));
         $ids_list = implode(',', $ids);
         $voters = $conn->query("SELECT firstname, lastname, photo FROM voters WHERE id IN ($ids_list)");
     }
 
+    // Insert voters as candidates
     $added = 0;
     if ($voters) {
         while ($voter = $voters->fetch_assoc()) {
-            $photo = !empty($voter['photo']) ? $voter['photo'] : '';
+            $photo = !empty($voter['photo']) ? $voter['photo'] : '';  // Use photo if available
             $stmt->bind_param('issss', $position_id, $voter['firstname'], $voter['lastname'], $photo, $platform);
             if ($stmt->execute()) {
                 $added++;
@@ -62,6 +69,7 @@ if (isset($_POST['add'])) {
     }
     $stmt->close();
 
+    // Success or error message
     if ($added > 0) {
         $_SESSION['success'] = "$added voter(s) converted to candidate(s) successfully.";
     } else {
@@ -72,6 +80,7 @@ if (isset($_POST['add'])) {
     $_SESSION['error'] = 'Fill up add form first';
 }
 
+// Redirect back to candidates page
 header('location: candidates.php');
 exit;
 ?>
