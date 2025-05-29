@@ -46,11 +46,11 @@
           unset($_SESSION['success']);
         }
       ?>
-      
+
       <!-- Statistics Cards -->
       <div class="row" style="margin-bottom: 30px;">
+        <!-- Positions Card -->
         <div class="col-lg-3 col-xs-6" style="margin-bottom: 20px;">
-          <!-- Positions Card -->
           <div class="small-box" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; transition: transform 0.3s ease;">
             <div class="inner" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 25px; position: relative;">
               <div style="position: absolute; top: -10px; right: -10px; width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
@@ -73,8 +73,8 @@
           </div>
         </div>
 
+        <!-- Candidates Card -->
         <div class="col-lg-3 col-xs-6" style="margin-bottom: 20px;">
-          <!-- Candidates Card -->
           <div class="small-box" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; transition: transform 0.3s ease;">
             <div class="inner" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 25px; position: relative;">
               <div style="position: absolute; top: -10px; right: -10px; width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
@@ -97,8 +97,8 @@
           </div>
         </div>
 
+        <!-- Voters Card -->
         <div class="col-lg-3 col-xs-6" style="margin-bottom: 20px;">
-          <!-- Voters Card -->
           <div class="small-box" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; transition: transform 0.3s ease;">
             <div class="inner" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; padding: 25px; position: relative;">
               <div style="position: absolute; top: -10px; right: -10px; width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
@@ -121,15 +121,17 @@
           </div>
         </div>
 
+        <!-- Votes Cast Card -->
         <div class="col-lg-3 col-xs-6" style="margin-bottom: 20px;">
-          <!-- Votes Cast Card -->
           <div class="small-box" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; transition: transform 0.3s ease;">
             <div class="inner" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 25px; position: relative;">
               <div style="position: absolute; top: -10px; right: -10px; width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
               <?php
-                $sql = "SELECT * FROM votes GROUP BY voters_id";
+                // Count unique voters who voted (group by voters_id)
+                $sql = "SELECT COUNT(DISTINCT voters_id) AS voters_participated FROM votes";
                 $query = $conn->query($sql);
-                echo "<h3 style='font-size: 36px; font-weight: 700; margin: 0 0 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);'>".$query->num_rows."</h3>";
+                $row = $query->fetch_assoc();
+                echo "<h3 style='font-size: 36px; font-weight: 700; margin: 0 0 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);'>".$row['voters_participated']."</h3>";
               ?>
               <p style="font-size: 16px; font-weight: 600; margin: 0; opacity: 0.9;">
                 <i class="fa fa-check-square" style="margin-right: 8px;"></i>
@@ -177,7 +179,7 @@
                 <div class='box-header with-border' style='background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-bottom: 3px solid #3b82f6; padding: 20px;'>
                   <h4 class='box-title' style='margin: 0; font-weight: 700; color: #1e40af; font-size: 18px; font-family: \"Segoe UI\", Tahoma, Geneva, Verdana, sans-serif;'>
                     <i class='fa fa-trophy' style='margin-right: 10px; color: #f59e0b;'></i>
-                    <b>".$row['description']."</b>
+                    <b>".htmlspecialchars($row['description'])."</b>
                     <span style='background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px; margin-left: 10px;'>TOP 5</span>
                   </h4>
                 </div>
@@ -189,7 +191,7 @@
               </div>
             </div>
           ";
-          if($inc == 2) echo "</div>";  
+          if($inc == 2) echo "</div>";
         }
         if($inc == 1) echo "<div class='col-sm-6'></div></div>";
       ?>
@@ -203,67 +205,60 @@
 
 <?php include 'includes/scripts.php'; ?>
 
-<!-- Chart.js Scripts with Top 5 Logic -->
+<!-- Chart.js Scripts with Top 5 Candidates per Position -->
 <?php
   $sql = "SELECT * FROM positions ORDER BY priority ASC";
   $query = $conn->query($sql);
+
   while($row = $query->fetch_assoc()){
-    // Modified query to get top 5 candidates with most votes for this position
-    $sql = "SELECT c.*, COUNT(v.id) as vote_count 
-            FROM candidates c 
-            LEFT JOIN votes v ON v.candidate_id = c.id 
-            WHERE c.position_id = '".$row['id']."' 
-            GROUP BY c.id 
-            ORDER BY vote_count DESC 
-            LIMIT 5";
-    $cquery = $conn->query($sql);
-    
-    $carray = array();
-    $varray = array();
-    $colors = array(
-      'rgba(30, 64, 175, 0.8)',   // Blue
-      'rgba(220, 38, 38, 0.8)',   // Red  
-      'rgba(5, 150, 105, 0.8)',   // Green
-      'rgba(124, 58, 237, 0.8)',  // Purple
-      'rgba(245, 158, 11, 0.8)'   // Orange
-    );
-    $borderColors = array(
-      'rgba(30, 64, 175, 1)',
-      'rgba(220, 38, 38, 1)', 
-      'rgba(5, 150, 105, 1)',
-      'rgba(124, 58, 237, 1)',
-      'rgba(245, 158, 11, 1)'
-    );
-    
-    $colorIndex = 0;
+    $positionId = $row['id'];
+
+    // Fetch top 5 candidates by vote count for this position
+    $sqlCandidates = "
+      SELECT c.firstname, c.lastname, COUNT(v.id) AS vote_count
+      FROM candidates c
+      LEFT JOIN votes v ON v.candidate_id = c.id AND v.position_id = $positionId
+      WHERE c.position_id = $positionId
+      GROUP BY c.id
+      ORDER BY vote_count DESC
+      LIMIT 5
+    ";
+    $cquery = $conn->query($sqlCandidates);
+
+    $candidateNames = [];
+    $voteCounts = [];
+
     while($crow = $cquery->fetch_assoc()){
-      array_push($carray, $crow['firstname'] . ' ' . $crow['lastname']);
-      array_push($varray, $crow['vote_count']);
-      $colorIndex++;
+      $candidateNames[] = $crow['firstname'] . ' ' . $crow['lastname'];
+      $voteCounts[] = (int)$crow['vote_count'];
     }
-    
-    // If less than 5 candidates, fill remaining slots
-    while(count($carray) < 5) {
-      array_push($carray, 'No Candidate');
-      array_push($varray, 0);
+
+    // Fill to 5 entries if less than 5 candidates
+    while(count($candidateNames) < 5){
+      $candidateNames[] = 'No Candidate';
+      $voteCounts[] = 0;
     }
-    
-    $carray = json_encode($carray);
-    $varray = json_encode($varray);
-    ?>
-    <script>
-    $(function(){
-      var description = '<?php echo slugify($row['description']); ?>';
-      var ctx = document.getElementById(description).getContext('2d');
-      
-      var chartData = {
-        labels: <?php echo $carray; ?>,
+
+    // JSON encode for JS
+    $candidateNamesJson = json_encode($candidateNames);
+    $voteCountsJson = json_encode($voteCounts);
+    $canvasId = slugify($row['description']);
+?>
+
+<script>
+  $(function(){
+    const ctx = document.getElementById('<?php echo $canvasId; ?>').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: <?php echo $candidateNamesJson; ?>,
         datasets: [{
           label: 'Votes',
-          data: <?php echo $varray; ?>,
+          data: <?php echo $voteCountsJson; ?>,
           backgroundColor: [
             'rgba(30, 64, 175, 0.8)',
-            'rgba(220, 38, 38, 0.8)', 
+            'rgba(220, 38, 38, 0.8)',
             'rgba(5, 150, 105, 0.8)',
             'rgba(124, 58, 237, 0.8)',
             'rgba(245, 158, 11, 0.8)'
@@ -271,7 +266,7 @@
           borderColor: [
             'rgba(30, 64, 175, 1)',
             'rgba(220, 38, 38, 1)',
-            'rgba(5, 150, 105, 1)', 
+            'rgba(5, 150, 105, 1)',
             'rgba(124, 58, 237, 1)',
             'rgba(245, 158, 11, 1)'
           ],
@@ -279,16 +274,13 @@
           borderRadius: 8,
           borderSkipped: false
         }]
-      };
-
-      var chartOptions = {
+      },
+      options: {
         responsive: true,
         maintainAspectRatio: false,
-        indexAxis: 'y', // This makes it a horizontal bar chart
+        indexAxis: 'y', // Horizontal bars
         plugins: {
-          legend: {
-            display: false
-          },
+          legend: { display: false },
           tooltip: {
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
             titleColor: 'white',
@@ -313,46 +305,32 @@
             },
             ticks: {
               color: '#374151',
-              font: {
-                weight: '600'
-              }
+              font: { weight: '600' }
             }
           },
           y: {
-            grid: {
-              display: false
-            },
+            grid: { display: false },
             ticks: {
               color: '#374151',
-              font: {
-                weight: '600'
-              },
-              callback: function(value, index, values) {
+              font: { weight: '600' },
+              callback: function(value) {
                 const label = this.getLabelForValue(value);
-                return label.length > 15 ? label.substring(0, 15) + '...' : label;
+                return label.length > 15 ? label.substr(0, 15) + '...' : label;
               }
             }
           }
         },
-        animation: {
-          duration: 1500,
-          easing: 'easeInOutQuart'
-        }
-      };
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: chartData,
-        options: chartOptions
-      });
+        animation: { duration: 1500, easing: 'easeInOutQuart' }
+      }
     });
-    </script>
-    <?php
-  }
-?>
+  });
+</script>
+
+<?php } ?>
 
 <style>
-/* Enhanced Dashboard Styling */
+/* Your existing styles... */
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -363,12 +341,10 @@ body {
   transition: all 0.3s ease;
   cursor: pointer;
 }
-
 .small-box:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
 }
-
 .small-box:hover .small-box-footer {
   background: rgba(0,0,0,0.1) !important;
 }
@@ -389,7 +365,6 @@ body {
 .box {
   transition: all 0.3s ease;
 }
-
 .box:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
@@ -401,23 +376,18 @@ body {
     margin: 10px !important;
     padding: 20px !important;
   }
-  
   .content-header h1 {
     font-size: 24px !important;
   }
-  
   .small-box .inner {
     padding: 20px !important;
   }
-  
   .small-box .inner h3 {
     font-size: 28px !important;
   }
-  
   .box-body {
     padding: 15px !important;
   }
-  
   canvas {
     height: 250px !important;
   }
@@ -427,19 +397,15 @@ body {
   .row {
     margin: 0 !important;
   }
-  
   .col-lg-3, .col-xs-6 {
     padding: 5px !important;
   }
-  
   .content-header h1 {
     font-size: 20px !important;
   }
-  
   .small-box .inner h3 {
     font-size: 24px !important;
   }
-  
   .box-title {
     font-size: 16px !important;
   }
