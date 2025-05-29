@@ -19,7 +19,7 @@
                     <div class="col-sm-10 col-sm-offset-1">
 
                         <?php
-                            // Display session messages without manual close buttons
+                            // Show session messages without manual close buttons
                             if(isset($_SESSION['error'])) {
                                 echo '<div class="alert alert-danger floating-alert" id="error-alert"><ul>';
                                 foreach($_SESSION['error'] as $error) {
@@ -127,33 +127,6 @@
     <?php include 'includes/ballot_modal.php'; ?>
 </div>
 
-<!-- Candidate Details Modal -->
-<div class="modal fade" id="candidateModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" style="border-radius: 15px;">
-            <div class="modal-header" style="background-color: #4a90e2; color: white; border-radius: 15px 15px 0 0;">
-                <h4 class="modal-title">Candidate Information</h4>
-            </div>
-            <div class="modal-body" style="padding: 30px;">
-                <div class="row">
-                    <div class="col-md-4 text-center">
-                        <img id="candidatePhoto" src="" class="img-responsive" style="border-radius: 10px; max-height: 200px; margin: 0 auto;">
-                    </div>
-                    <div class="col-md-8">
-                        <h3 id="candidateName" style="color: #2c5aa0; margin-bottom: 20px;"></h3>
-                        <h5 style="color: #666; margin-bottom: 10px;">Platform:</h5>
-                        <div id="candidatePlatform" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4a90e2;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="text-align: center;">
-                <button type="button" class="btn btn-primary" id="selectCandidate" style="background-color: #4a90e2; border-color: #4a90e2; border-radius: 25px; padding: 10px 30px;">Select This Candidate</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 25px; padding: 10px 30px;">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php include 'includes/scripts.php'; ?>
 
 <script>
@@ -163,7 +136,7 @@ $(function() {
     // Auto-fade visible alerts after 20s
     function autoFadeAlerts() {
         $('.floating-alert:visible').each(function() {
-            setTimeout(() => $(this).fadeOut(1000), 1000);
+            setTimeout(() => $(this).fadeOut(1000), 20000);
         });
     }
     autoFadeAlerts();
@@ -178,10 +151,8 @@ $(function() {
                   .find(msgClass).html(msg);
         $(alertId).stop(true, true).fadeIn(500);
 
-        // Clear any existing timeout to prevent conflicts
         clearTimeout($(alertId).data('fadeTimeout'));
-        // Set fade out after 20 seconds
-        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 1000);
+        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 20000);
         $(alertId).data('fadeTimeout', timeout);
     }
 
@@ -343,7 +314,7 @@ $(function() {
                 $('#search-container-' + pos).show();  // Show search container back when none selected
             }
 
-            if (removed) showAlert(`${removed.firstname} ${removed.lastname} removed.`, 'danger'); // red color here
+            if (removed) showAlert(`${removed.firstname} ${removed.lastname} removed.`, 'danger');
         }
     });
 
@@ -357,7 +328,7 @@ $(function() {
         });
     }
 
-    // Preview button click
+    // Preview button click (ajax)
     $('#preview').click(function(e) {
         e.preventDefault();
         let form = $('#ballotForm').serialize();
@@ -388,43 +359,6 @@ $(function() {
             },
             complete: function() {
                 $('#preview').html('<i class="fa fa-file-text"></i> Preview').prop('disabled', false);
-            }
-        });
-    });
-
-    // Vote form submission
-    $('#ballotForm').submit(function(e) {
-        e.preventDefault();
-        let formData = $(this).serialize();
-        if (!formData) {
-            showAlert('Select at least one candidate before submitting.', 'warning');
-            return false;
-        }
-
-        if (!confirm('Are you sure you want to submit your vote? This action cannot be undone.')) {
-            return false;
-        }
-
-        let $btn = $('button[name="vote"]');
-        $btn.html('<i class="fa fa-spinner fa-spin"></i> Submitting...').prop('disabled', true);
-
-        $.ajax({
-            type: 'POST',
-            url: 'submit_ballot.php',
-            data: formData,
-            dataType: 'json',
-            success: function(resp) {
-                if (resp.success) {
-                    showAlert('Vote submitted successfully!', 'success');
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showAlert(resp.message || 'Failed to submit vote. Try again.', 'danger');
-                    $btn.html('<i class="fa fa-check-square-o"></i> Submit Vote').prop('disabled', false);
-                }
-            },
-            error: function() {
-                showAlert('Failed to submit vote. Check your connection and try again.', 'danger');
-                $btn.html('<i class="fa fa-check-square-o"></i> Submit Vote').prop('disabled', false);
             }
         });
     });
