@@ -81,8 +81,8 @@
                                                                     <input type="text" class="form-control candidate-search" placeholder="Search candidates by first name or last name..." style="border: 2px solid #d1d5db; border-radius: 25px 0 0 25px; padding: 12px 18px; font-size: 16px; transition: border-color 0.3s ease;" 
                                                                         data-position="<?php echo $row['id']; ?>" data-slug="<?php echo $slug; ?>" data-max-vote="<?php echo $row['max_vote']; ?>">
                                                                     <span class="input-group-btn">
-                                                                        <button class="btn btn-primary search-btn" type="button" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-color: #059669; border-radius: 0 25px 25px 0; padding: 12px 24px;">
-                                                                            <i class="fa fa-search"></i>
+                                                                        <button class="btn btn-primary search-btn" type="button" style="background: #1e40af; border-color: #1e40af; border-radius: 0 25px 25px 0; padding: 12px 24px;">
+                                                                            Search
                                                                         </button>
                                                                     </span>
                                                                 </div>
