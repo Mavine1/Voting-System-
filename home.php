@@ -202,8 +202,8 @@
                                         }
                                     ?>
                                     <div class="text-center" style="margin-top: 40px;">
-                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
-                                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
+                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #008000; border-color: #1e40af; color: #ffffff; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
                                     </div>
                                 </form>
                                 <!-- End Voting Ballot -->
