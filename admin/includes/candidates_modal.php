@@ -85,6 +85,7 @@
 </div>
 
 <!-- Convert Voters Modal -->
+<!-- Convert Voters Modal -->
 <div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document" >
     <div class="modal-content" style="background-color: #d8d1bd; color:black; font-size: 15px; font-family: Times;">
@@ -94,7 +95,8 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form id="convertVotersForm" method="POST" action="candidates_convert.php">
+      <!-- Remove method and action to prevent default form post -->
+      <form id="convertVotersForm" autocomplete="off" onsubmit="return false;">
         <div class="modal-body">
           <!-- Convert All Voters Checkbox -->
           <div class="form-group">
@@ -105,7 +107,7 @@
           <!-- Search Box -->
           <div class="form-group">
             <label for="voterSearch">Search Voters by Name</label>
-            <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off" <?= 'required' /* will toggle later by JS */ ?>>
+            <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off" required>
             <div id="searchResults" style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ccc; display:none; position: relative; z-index: 1050;"></div>
           </div>
 
@@ -138,18 +140,75 @@
             <textarea class="form-control" id="convertPlatform" name="platform" rows="5" placeholder="Enter platform description..." required></textarea>
           </div>
 
-          <!-- Hidden input to hold selected voter IDs for submission -->
+          <!-- Hidden input to hold selected voter IDs -->
           <input type="hidden" id="selectedVotersInput" name="voters" value="">
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-          <button type="submit" id="convertVoters" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;"><i class="fa fa-exchange"></i> Convert Selected</button>
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal">
+            <i class="fa fa-close"></i> Close
+          </button>
+          <button type="button" id="convertVotersBtn" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;">
+            <i class="fa fa-exchange"></i> Convert Selected
+          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<script>
+// Assume voters data and select logic here, similar to previous code, omitted for brevity
+
+document.getElementById('convertVotersBtn').addEventListener('click', function() {
+  // Get values
+  const convertAll = document.getElementById('convertAllVoters').checked;
+  const position = document.getElementById('convertPosition').value;
+  const platform = document.getElementById('convertPlatform').value.trim();
+  const selectedVoters = document.getElementById('selectedVotersInput').value;
+
+  // Validation
+  if (!position) {
+    alert('Please select a position.');
+    return;
+  }
+  if (!platform) {
+    alert('Please enter a platform description.');
+    return;
+  }
+  if (!convertAll && (!selectedVoters || selectedVoters.trim() === '')) {
+    alert('Please select voters or check "Convert All Voters".');
+    return;
+  }
+
+  // Prepare data
+  const data = new FormData();
+  data.append('convert_all', convertAll ? '1' : '0');
+  data.append('position', position);
+  data.append('platform', platform);
+  if (!convertAll) data.append('voters', selectedVoters);
+
+  // AJAX request
+  fetch('candidates_convert.php', {
+    method: 'POST',
+    body: data,
+  })
+  .then(response => response.json())
+  .then(result => {
+    if(result.success) {
+      alert(result.message || 'Voters converted successfully.');
+      // Optionally refresh page or UI
+      location.reload();
+    } else {
+      alert(result.error || 'Error converting voters.');
+    }
+  })
+  .catch(err => {
+    alert('AJAX error: ' + err);
+  });
+});
+</script>
+
 
 <script>
 (() => {
