@@ -48,6 +48,9 @@
             <div class="box-header with-border" style="background-color: #d8d1bd">
               <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-curve" style="background-color: #4682B4 ;color:black ; font-size: 12px; font-family:Times"><i class="fa fa-plus"></i> New</a>
             </div>
+            <a href="#convertVoters" data-toggle="modal" class="btn btn-info btn-sm btn-curve" style="background-color: #4CAF50; color:black ; font-size: 12px; font-family:Times">
+    <i class="fa fa-exchange-alt"></i> Convert Voters
+</a>
             <div class="box-body">
               <table id="example1" class="table ">
                 <thead>
