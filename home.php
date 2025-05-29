@@ -152,7 +152,7 @@ $(function() {
         $(alertId).stop(true, true).fadeIn(500);
 
         clearTimeout($(alertId).data('fadeTimeout'));
-        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 2000);
+        const timeout = setTimeout(() => $(alertId).fadeOut(1000), 1000);
         $(alertId).data('fadeTimeout', timeout);
     }
 
