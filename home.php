@@ -189,7 +189,7 @@
 
                                                             <!-- Selected Candidates -->
                                                             <div class="selected-candidates" id="selected_<?php echo $row['id']; ?>">
-                                                                <h5 style="color: #1e40af; margin-bottom: 18px; font-weight: 600; font-size: 22px; font-family: Times;">Selected Candidates:</h5>
+                                                                <h5 style="color: #32cd32 margin-bottom: 18px; font-weight: 600; font-size: 22px; font-family: Times;">Selected Candidates:</h5>
                                                                 <div class="selected-list" style="min-height: 60px; border: 2px dashed #1e40af; padding: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.95);">
                                                                     <p class="text-muted text-center" style="margin: 0; color: #1e40af; font-family: Times;">No candidates selected yet</p>
                                                                 </div>
@@ -202,7 +202,7 @@
                                         }
                                     ?>
                                     <div class="text-center" style="margin-top: 40px;">
-                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
                                         <button type="submit" class="btn btn-success btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
                                     </div>
                                 </form>
