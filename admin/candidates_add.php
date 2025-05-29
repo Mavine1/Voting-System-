@@ -1,8 +1,9 @@
 <?php
 include 'includes/session.php';
 
+// Check if the form is for adding a candidate
 if (isset($_POST['add'])) {
-    // Single candidate add with uploaded photo
+    // Get candidate details from POST data
     $firstname = $conn->real_escape_string($_POST['firstname']);
     $lastname = $conn->real_escape_string($_POST['lastname']);
     $position = intval($_POST['position']);
@@ -14,7 +15,7 @@ if (isset($_POST['add'])) {
         move_uploaded_file($_FILES['photo']['tmp_name'], '../images/' . $filename);
     }
 
-    // Insert candidate into the database
+    // Insert the candidate into the database
     $sql = "INSERT INTO candidates (position_id, firstname, lastname, photo, platform) 
             VALUES ('$position', '$firstname', '$lastname', '$filename', '$platform')";
     if ($conn->query($sql)) {
@@ -30,6 +31,7 @@ if (isset($_POST['add'])) {
     $add_all = isset($_POST['add_all_voters']);  // Option to add all voters
     $selected_voters = isset($_POST['selected_voters']) ? $_POST['selected_voters'] : '';  // Selected voters
 
+    // Check if a position was selected
     if (!$position_id) {
         $_SESSION['error'] = 'Please select a position.';
         header('location: candidates.php');
