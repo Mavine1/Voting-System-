@@ -83,6 +83,63 @@
         </div>
     </div>
 </div>
+<!---convert----!-->
+<!-- Convert Voters Modal -->
+<div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <form id="convertVoterForm" method="POST" action="candidates_add.php">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="convertVotersLabel">Convert Voters to Candidates</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Search Voters by Name</label>
+            <input type="text" id="voterSearch" class="form-control" placeholder="Enter first or last name...">
+            <small class="form-text text-muted">Type at least 2 characters to search.</small>
+          </div>
+          <div id="voterSearchResults" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
+            <!-- AJAX voter search results will appear here -->
+          </div>
+
+          <hr>
+
+          <div class="form-group">
+            <label for="positionSelect">Select Position</label>
+            <select id="positionSelect" name="position" class="form-control" required>
+              <option value="">-- Select Position --</option>
+              <?php
+              $posSql = "SELECT * FROM positions ORDER BY priority ASC";
+              $posQuery = $conn->query($posSql);
+              while($pos = $posQuery->fetch_assoc()) {
+                echo "<option value='{$pos['id']}'>" . htmlspecialchars($pos['description']) . "</option>";
+              }
+              ?>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="platformDesc">Platform Description</label>
+            <textarea id="platformDesc" name="platform" class="form-control" rows="4" placeholder="Enter platform description" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><input type="checkbox" id="addAllVoters" name="add_all_voters"> Add <strong>ALL</strong> voters as candidates (ignore search/select)</label>
+          </div>
+
+          <!-- Hidden inputs for selected voters -->
+          <input type="hidden" name="selected_voters" id="selectedVotersInput">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Convert to Candidates</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 <!-- Edit -->
 <div class="modal fade" id="edit">
