@@ -83,7 +83,7 @@
         </div>
     </div>
 </div>
-<!-- Convert Voters Modal -->
+
 <!-- Convert Voters Modal -->
 <div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document" >
@@ -94,73 +94,211 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- Search Box -->
-        <div class="form-group">
-          <label for="voterSearch">Search Voters by Name</label>
-          <input type="text" id="voterSearch" class="form-control" placeholder="Enter first or last name...">
-        </div>
+      <form id="convertVotersForm" method="POST" action="candidates_convert.php">
+        <div class="modal-body">
+          <!-- Convert All Voters Checkbox -->
+          <div class="form-group">
+            <input type="checkbox" id="convertAllVoters" name="convert_all" value="1">
+            <label for="convertAllVoters"><strong>Convert All Voters</strong></label>
+          </div>
 
-        <!-- Voters List -->
-        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: white;">
-          <table class="table table-striped table-hover" id="votersTable">
-            <thead>
-              <tr>
-                <th>Select</th>
-                <th>Photo</th>
-                <th>Firstname</th>
-                <th>Lastname</th>
-              </tr>
-            </thead>
-            <tbody>
+          <!-- Search Box -->
+          <div class="form-group">
+            <label for="voterSearch">Search Voters by Name</label>
+            <input type="text" id="voterSearch" class="form-control" placeholder="Type first or last name..." autocomplete="off" <?= 'required' /* will toggle later by JS */ ?>>
+            <div id="searchResults" style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ccc; display:none; position: relative; z-index: 1050;"></div>
+          </div>
+
+          <!-- Selected Voters List -->
+          <div class="form-group">
+            <label><strong>Selected Voters</strong></label>
+            <div id="selectedVotersList" style="min-height: 80px; border: 1px solid #ccc; padding: 10px; background: white;">
+              <small>No voters selected</small>
+            </div>
+          </div>
+
+          <!-- Position Select -->
+          <div class="form-group">
+            <label for="convertPosition">Select Position</label>
+            <select class="form-control" id="convertPosition" name="position" required>
+              <option value="" selected disabled>-- Select Position --</option>
               <?php
-                // Example PHP query to fetch all voters ordered by firstname (you can add filtering server side or AJAX)
-                $sql = "SELECT id, firstname, lastname, photo FROM voters ORDER BY firstname, lastname";
-                $query = $conn->query($sql);
-                while($row = $query->fetch_assoc()){
-                  echo '
-                  <tr>
-                    <td><input type="checkbox" class="voter-checkbox" name="voters[]" value="'.$row['id'].'"></td>
-                    <td><img src="uploads/voters/'.$row['photo'].'" alt="Photo" style="width:50px; height:50px; object-fit:cover; border-radius: 4px;"></td>
-                    <td>'.htmlspecialchars($row['firstname']).'</td>
-                    <td>'.htmlspecialchars($row['lastname']).'</td>
-                  </tr>
-                  ';
+                $pos_sql = "SELECT id, description FROM positions ORDER BY description";
+                $pos_query = $conn->query($pos_sql);
+                while($pos_row = $pos_query->fetch_assoc()){
+                  echo '<option value="'.$pos_row['id'].'">'.htmlspecialchars($pos_row['description']).'</option>';
                 }
               ?>
-            </tbody>
-          </table>
+            </select>
+          </div>
+
+          <!-- Platform Description -->
+          <div class="form-group">
+            <label for="convertPlatform">Platform Description</label>
+            <textarea class="form-control" id="convertPlatform" name="platform" rows="5" placeholder="Enter platform description..." required></textarea>
+          </div>
+
+          <!-- Hidden input to hold selected voter IDs for submission -->
+          <input type="hidden" id="selectedVotersInput" name="voters" value="">
         </div>
 
-        <!-- Position Select -->
-        <div class="form-group" style="margin-top: 15px;">
-          <label for="convertPosition">Select Position</label>
-          <select class="form-control" id="convertPosition" name="position" required>
-            <option value="" selected disabled>-- Select Position --</option>
-            <?php
-              $pos_sql = "SELECT id, description FROM positions ORDER BY description";
-              $pos_query = $conn->query($pos_sql);
-              while($pos_row = $pos_query->fetch_assoc()){
-                echo '<option value="'.$pos_row['id'].'">'.htmlspecialchars($pos_row['description']).'</option>';
-              }
-            ?>
-          </select>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
+          <button type="submit" id="convertVoters" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;"><i class="fa fa-exchange"></i> Convert Selected</button>
         </div>
-
-        <!-- Platform Description -->
-        <div class="form-group">
-          <label for="convertPlatform">Platform Description</label>
-          <textarea class="form-control" id="convertPlatform" name="platform" rows="5" placeholder="Enter platform description..." required></textarea>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #FFDEAD; color:black; font-size: 12px; font-family: Times;" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-        <button type="button" id="convertVoters" class="btn btn-primary btn-curve" style="background-color: #9CD095; color:black; font-size: 12px; font-family: Times;"><i class="fa fa-exchange"></i> Convert Selected</button>
-      </div>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+(() => {
+  // Load all voters once (in a real app, consider AJAX fetching)
+  const voters = [
+    <?php
+      $sql = "SELECT id, firstname, lastname, photo FROM voters ORDER BY firstname, lastname";
+      $query = $conn->query($sql);
+      $arr = [];
+      while ($row = $query->fetch_assoc()) {
+        $id = $row['id'];
+        $fname = addslashes($row['firstname']);
+        $lname = addslashes($row['lastname']);
+        $photo = addslashes($row['photo']);
+        $arr[] = "{id: $id, firstname: '$fname', lastname: '$lname', photo: '$photo'}";
+      }
+      echo implode(",", $arr);
+    ?>
+  ];
+
+  const voterSearch = document.getElementById('voterSearch');
+  const searchResults = document.getElementById('searchResults');
+  const selectedVotersList = document.getElementById('selectedVotersList');
+  const selectedVotersInput = document.getElementById('selectedVotersInput');
+  const convertAllCheckbox = document.getElementById('convertAllVoters');
+  const convertPosition = document.getElementById('convertPosition');
+  const convertPlatform = document.getElementById('convertPlatform');
+  const form = document.getElementById('convertVotersForm');
+
+  let selectedVoters = new Map(); // key=id, value=object
+
+  function renderSelectedVoters() {
+    if(selectedVoters.size === 0) {
+      selectedVotersList.innerHTML = '<small>No voters selected</small>';
+    } else {
+      let html = '<div class="row">';
+      selectedVoters.forEach(voter => {
+        html += `
+          <div class="col-xs-6 col-sm-4 col-md-3" style="margin-bottom:10px;">
+            <div style="border:1px solid #ccc; padding:5px; border-radius:4px; display:flex; align-items:center;">
+              <img src="uploads/voters/${voter.photo}" alt="Photo" style="width:40px; height:40px; object-fit:cover; border-radius:3px; margin-right:8px;">
+              <span>${voter.firstname} ${voter.lastname}</span>
+              <button type="button" class="btn btn-xs btn-danger" style="margin-left:auto;" data-id="${voter.id}">&times;</button>
+            </div>
+          </div>`;
+      });
+      html += '</div>';
+      selectedVotersList.innerHTML = html;
+
+      // Add remove button event listeners
+      selectedVotersList.querySelectorAll('button.btn-danger').forEach(btn => {
+        btn.onclick = () => {
+          selectedVoters.delete(parseInt(btn.dataset.id));
+          renderSelectedVoters();
+          updateSelectedVotersInput();
+        };
+      });
+    }
+    updateSelectedVotersInput();
+  }
+
+  function updateSelectedVotersInput() {
+    // Convert Map keys to comma-separated string
+    selectedVotersInput.value = Array.from(selectedVoters.keys()).join(',');
+  }
+
+  function filterVoters(term) {
+    if(term.trim() === '') {
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+      return;
+    }
+    term = term.toLowerCase();
+    let matches = voters.filter(v => v.firstname.toLowerCase().includes(term) || v.lastname.toLowerCase().includes(term));
+    if(matches.length === 0) {
+      searchResults.innerHTML = '<div style="padding:8px;">No voters found</div>';
+    } else {
+      searchResults.innerHTML = matches.map(v => `
+        <div class="search-result-item" style="padding:6px 8px; cursor:pointer; display:flex; align-items:center; border-bottom:1px solid #eee;">
+          <img src="uploads/voters/${v.photo}" alt="Photo" style="width:30px; height:30px; object-fit:cover; border-radius:3px; margin-right:8px;">
+          <span>${v.firstname} ${v.lastname}</span>
+        </div>
+      `).join('');
+      // Add click handlers for each
+      Array.from(searchResults.children).forEach((el, idx) => {
+        el.onclick = () => {
+          const voter = matches[idx];
+          if(!selectedVoters.has(voter.id)) {
+            selectedVoters.set(voter.id, voter);
+            renderSelectedVoters();
+          }
+          voterSearch.value = '';
+          searchResults.style.display = 'none';
+          searchResults.innerHTML = '';
+        };
+      });
+    }
+    searchResults.style.display = 'block';
+  }
+
+  // Event listeners
+  voterSearch.addEventListener('input', e => {
+    if(convertAllCheckbox.checked) return; // ignore search if convert all checked
+    filterVoters(e.target.value);
+  });
+
+  convertAllCheckbox.addEventListener('change', () => {
+    if(convertAllCheckbox.checked) {
+      // Disable search and clear selected voters
+      voterSearch.value = '';
+      searchResults.style.display = 'none';
+      searchResults.innerHTML = '';
+      selectedVoters.clear();
+      renderSelectedVoters();
+      voterSearch.disabled = true;
+      voterSearch.required = false;
+    } else {
+      voterSearch.disabled = false;
+      voterSearch.required = true;
+    }
+  });
+
+  form.addEventListener('submit', e => {
+    if(!convertAllCheckbox.checked && selectedVoters.size === 0) {
+      e.preventDefault();
+      alert('Please select at least one voter or check "Convert All Voters"');
+      return false;
+    }
+    if(!convertPosition.value) {
+      e.preventDefault();
+      alert('Please select a position');
+      return false;
+    }
+    if(!convertPlatform.value.trim()) {
+      e.preventDefault();
+      alert('Please enter a platform description');
+      return false;
+    }
+
+    // If convertAll is checked, clear selected voters input because all voters will be converted server-side
+    if(convertAllCheckbox.checked){
+      selectedVotersInput.value = '';
+    }
+  });
+
+  // Initialize
+  renderSelectedVoters();
+})();
+</script>
 
 <script>
 // Optional: Simple client-side search filtering for voters table
