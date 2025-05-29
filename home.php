@@ -20,7 +20,7 @@
 	        		<?php
 				        if(isset($_SESSION['error'])){
 				        	?>
-				        	<div class="alert alert-danger alert-dismissible">
+				        	<div class="alert alert-danger alert-dismissible floating-alert" id="error-alert">
 				        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 					        	<ul>
 					        		<?php
@@ -38,7 +38,7 @@
 				        }
 				        if(isset($_SESSION['success'])){
 				          	echo "
-				            	<div class='alert alert-success alert-dismissible'>
+				            	<div class='alert alert-success alert-dismissible floating-alert' id='success-alert'>
 				              		<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
 				              		<h4><i class='icon fa fa-check'></i> Success!</h4>
 				              	".$_SESSION['success']."
@@ -49,9 +49,14 @@
 
 				    ?>
  
-				    <div class="alert alert-danger alert-dismissible" id="alert" style="display:none;">
+				    <div class="alert alert-danger alert-dismissible floating-alert" id="alert" style="display:none;">
 		        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 			        	<span class="message"></span>
+			        </div>
+
+			        <div class="alert alert-info alert-dismissible floating-alert" id="info-alert" style="display:none;">
+		        		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			        	<span class="info-message"></span>
 			        </div>
 
 				    <?php
@@ -182,14 +187,50 @@ $(document).ready(function(){
     let selectedCandidates = {};
     let currentCandidate = null;
     
-    // Search functionality
+    // Auto-fade messages after 30 seconds
+    function setupAutoFadeMessages() {
+        $('.floating-alert').each(function() {
+            if ($(this).is(':visible')) {
+                setTimeout(() => {
+                    $(this).fadeOut(1000);
+                }, 30000); // 30 seconds
+            }
+        });
+    }
+    
+    // Show floating message
+    function showFloatingMessage(message, type = 'danger') {
+        let alertId = type === 'success' ? '#info-alert' : '#alert';
+        let messageClass = type === 'success' ? '.info-message' : '.message';
+        
+        $(alertId).find(messageClass).html(message);
+        $(alertId).removeClass('alert-danger alert-success alert-info')
+                  .addClass('alert-' + type)
+                  .fadeIn(500);
+        
+        // Auto-fade after 30 seconds
+        setTimeout(() => {
+            $(alertId).fadeOut(1000);
+        }, 30000);
+    }
+    
+    // Initialize auto-fade for existing messages
+    setupAutoFadeMessages();
+    
+    // AJAX Search functionality with enhanced error handling
     $('.candidate-search').on('input', function(){
-        let searchTerm = $(this).val();
+        let searchTerm = $(this).val().trim();
         let positionId = $(this).data('position');
         let slug = $(this).data('slug');
         let maxVote = $(this).data('max-vote');
         
         if(searchTerm.length >= 2) {
+            // Show loading state
+            let resultsContainer = $('#results_' + positionId);
+            let candidatesList = resultsContainer.find('.candidates-list');
+            candidatesList.html('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
+            resultsContainer.show();
+            
             $.ajax({
                 url: 'search_candidates.php',
                 method: 'POST',
@@ -198,16 +239,33 @@ $(document).ready(function(){
                     position_id: positionId
                 },
                 dataType: 'json',
+                timeout: 10000, // 10 second timeout
                 success: function(response) {
-                    displaySearchResults(response, positionId, slug, maxVote);
+                    if (response && Array.isArray(response)) {
+                        displaySearchResults(response, positionId, slug, maxVote);
+                    } else {
+                        candidatesList.html('<p class="text-center text-danger">Invalid response from server</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    let errorMessage = 'Search failed. ';
+                    if (status === 'timeout') {
+                        errorMessage += 'Request timed out. Please try again.';
+                    } else if (status === 'error') {
+                        errorMessage += 'Server error. Please try again later.';
+                    } else {
+                        errorMessage += 'Please check your connection and try again.';
+                    }
+                    candidatesList.html('<p class="text-center text-danger">' + errorMessage + '</p>');
+                    showFloatingMessage(errorMessage, 'danger');
                 }
             });
-        } else {
+        } else if(searchTerm.length === 0) {
             $('#results_' + positionId).hide();
         }
     });
     
-    // Display search results
+    // Display search results with enhanced UI
     function displaySearchResults(candidates, positionId, slug, maxVote) {
         let resultsContainer = $('#results_' + positionId);
         let candidatesList = resultsContainer.find('.candidates-list');
@@ -216,27 +274,34 @@ $(document).ready(function(){
             let html = '';
             candidates.forEach(function(candidate) {
                 let photo = candidate.photo ? 'images/' + candidate.photo : 'images/profile.jpg';
+                let platform = candidate.platform || 'No platform information available';
+                
                 html += `
                     <div class="candidate-item" style="border: 2px solid #e3f2fd; border-radius: 10px; padding: 15px; margin-bottom: 10px; background-color: white; cursor: pointer; transition: all 0.3s;" 
                          data-candidate-id="${candidate.id}" 
-                         data-firstname="${candidate.firstname}" 
-                         data-lastname="${candidate.lastname}" 
+                         data-firstname="${candidate.firstname || ''}" 
+                         data-lastname="${candidate.lastname || ''}" 
                          data-photo="${photo}" 
-                         data-platform="${candidate.platform}"
+                         data-platform="${platform}"
                          data-position="${positionId}"
                          data-slug="${slug}"
                          data-max-vote="${maxVote}">
                         <div class="row">
                             <div class="col-md-3">
-                                <img src="${photo}" class="img-responsive" style="border-radius: 8px; max-height: 100px; width: 100%;">
+                                <img src="${photo}" class="img-responsive" style="border-radius: 8px; max-height: 100px; width: 100%; object-fit: cover;" 
+                                     onerror="this.src='images/profile.jpg'">
                             </div>
                             <div class="col-md-6">
                                 <h5 style="color: #2c5aa0; margin-bottom: 5px;">${candidate.firstname} ${candidate.lastname}</h5>
-                                <p style="color: #666; font-size: 14px;">${candidate.platform.substring(0, 100)}${candidate.platform.length > 100 ? '...' : ''}</p>
+                                <p style="color: #666; font-size: 14px;">${platform.substring(0, 100)}${platform.length > 100 ? '...' : ''}</p>
                             </div>
                             <div class="col-md-3 text-center">
                                 <button type="button" class="btn btn-info btn-sm view-details" style="background-color: #17a2b8; border-radius: 20px; margin-bottom: 5px;">
                                     <i class="fa fa-eye"></i> View Details
+                                </button>
+                                <br>
+                                <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #28a745; border-radius: 20px;">
+                                    <i class="fa fa-plus"></i> Select
                                 </button>
                             </div>
                         </div>
@@ -246,7 +311,7 @@ $(document).ready(function(){
             candidatesList.html(html);
             resultsContainer.show();
         } else {
-            candidatesList.html('<p class="text-center text-muted">No candidates found</p>');
+            candidatesList.html('<p class="text-center text-muted"><i class="fa fa-search"></i> No candidates found matching your search</p>');
             resultsContainer.show();
         }
     }
@@ -281,21 +346,30 @@ $(document).ready(function(){
     });
     
     // Select candidate directly from search results
-    $(document).on('click', '.candidate-item', function() {
+    $(document).on('click', '.select-candidate', function(e) {
+        e.stopPropagation();
+        let item = $(this).closest('.candidate-item');
         let candidate = {
-            id: $(this).data('candidate-id'),
-            firstname: $(this).data('firstname'),
-            lastname: $(this).data('lastname'),
-            photo: $(this).data('photo'),
-            platform: $(this).data('platform'),
-            position: $(this).data('position'),
-            slug: $(this).data('slug'),
-            maxVote: $(this).data('max-vote')
+            id: item.data('candidate-id'),
+            firstname: item.data('firstname'),
+            lastname: item.data('lastname'),
+            photo: item.data('photo'),
+            platform: item.data('platform'),
+            position: item.data('position'),
+            slug: item.data('slug'),
+            maxVote: item.data('max-vote')
         };
         selectCandidate(candidate);
     });
     
-    // Function to select candidate
+    // Click on candidate item to view details
+    $(document).on('click', '.candidate-item', function(e) {
+        if (!$(e.target).hasClass('btn') && !$(e.target).closest('.btn').length) {
+            $(this).find('.view-details').click();
+        }
+    });
+    
+    // Function to select candidate with enhanced validation
     function selectCandidate(candidate) {
         if(!selectedCandidates[candidate.position]) {
             selectedCandidates[candidate.position] = [];
@@ -304,19 +378,20 @@ $(document).ready(function(){
         // Check if candidate is already selected
         let alreadySelected = selectedCandidates[candidate.position].find(c => c.id === candidate.id);
         if(alreadySelected) {
-            alert('This candidate is already selected!');
+            showFloatingMessage('This candidate is already selected!', 'warning');
             return;
         }
         
         // Check max vote limit
         if(selectedCandidates[candidate.position].length >= candidate.maxVote) {
-            alert(`You can only select up to ${candidate.maxVote} candidate(s) for this position.`);
+            showFloatingMessage(`You can only select up to ${candidate.maxVote} candidate(s) for this position.`, 'warning');
             return;
         }
         
         selectedCandidates[candidate.position].push(candidate);
         updateSelectedCandidates(candidate.position);
         updateHiddenInputs(candidate.position, candidate.slug, candidate.maxVote);
+        showFloatingMessage(`${candidate.firstname} ${candidate.lastname} has been selected successfully!`, 'success');
     }
     
     // Update selected candidates display
@@ -330,16 +405,18 @@ $(document).ready(function(){
             let html = '';
             candidates.forEach(function(candidate, index) {
                 html += `
-                    <div class="selected-candidate" style="border: 2px solid #4a90e2; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: white;">
+                    <div class="selected-candidate" style="border: 2px solid #4a90e2; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: white; animation: slideIn 0.3s ease;">
                         <div class="row">
                             <div class="col-md-2">
-                                <img src="${candidate.photo}" class="img-responsive" style="border-radius: 5px; max-height: 60px;">
+                                <img src="${candidate.photo}" class="img-responsive" style="border-radius: 5px; max-height: 60px; object-fit: cover;" 
+                                     onerror="this.src='images/profile.jpg'">
                             </div>
                             <div class="col-md-8">
-                                <h6 style="color: #2c5aa0; margin: 0;">${candidate.firstname} ${candidate.lastname}</h6>
+                                <h6 style="color: #2c5aa0; margin: 0; font-weight: bold;">${candidate.firstname} ${candidate.lastname}</h6>
+                                <small style="color: #666;">Position ${index + 1}</small>
                             </div>
                             <div class="col-md-2 text-right">
-                                <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${positionId}" data-candidate-id="${candidate.id}" style="border-radius: 15px;">
+                                <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${positionId}" data-candidate-id="${candidate.id}" style="border-radius: 15px;" title="Remove candidate">
                                     <i class="fa fa-times"></i>
                                 </button>
                             </div>
@@ -356,16 +433,22 @@ $(document).ready(function(){
         let positionId = $(this).data('position');
         let candidateId = $(this).data('candidate-id');
         
+        let removedCandidate = selectedCandidates[positionId].find(c => c.id === candidateId);
         selectedCandidates[positionId] = selectedCandidates[positionId].filter(c => c.id !== candidateId);
         updateSelectedCandidates(positionId);
         
         // Update hidden inputs
-        let position = Object.values(selectedCandidates).find(pos => pos.length > 0 && pos[0].position === positionId);
+        let position = selectedCandidates[positionId];
         if(position && position.length > 0) {
             updateHiddenInputs(positionId, position[0].slug, position[0].maxVote);
         } else {
             // Remove all hidden inputs for this position
-            $(`input[name^="${$('.candidate-search[data-position="' + positionId + '"]').data('slug')}"]`).remove();
+            let slug = $('.candidate-search[data-position="' + positionId + '"]').data('slug');
+            $(`input[name^="${slug}"]`).remove();
+        }
+        
+        if (removedCandidate) {
+            showFloatingMessage(`${removedCandidate.firstname} ${removedCandidate.lastname} has been removed from your selection.`, 'info');
         }
     });
     
@@ -386,51 +469,118 @@ $(document).ready(function(){
         });
     }
     
-    // Reset functionality
+    // Reset functionality with confirmation
     $(document).on('click', '.reset', function(e) {
         e.preventDefault();
         let desc = $(this).data('desc');
         let positionId = $('.candidate-search[data-slug="' + desc + '"]').data('position');
         
-        selectedCandidates[positionId] = [];
-        updateSelectedCandidates(positionId);
-        $(`input[name^="${desc}"]`).remove();
-        $('.candidate-search[data-slug="' + desc + '"]').val('');
-        $('#results_' + positionId).hide();
+        if (selectedCandidates[positionId] && selectedCandidates[positionId].length > 0) {
+            if (confirm('Are you sure you want to reset all selections for this position?')) {
+                selectedCandidates[positionId] = [];
+                updateSelectedCandidates(positionId);
+                $(`input[name^="${desc}"]`).remove();
+                $('.candidate-search[data-slug="' + desc + '"]').val('');
+                $('#results_' + positionId).hide();
+                showFloatingMessage('Selections have been reset for this position.', 'info');
+            }
+        } else {
+            selectedCandidates[positionId] = [];
+            updateSelectedCandidates(positionId);
+            $(`input[name^="${desc}"]`).remove();
+            $('.candidate-search[data-slug="' + desc + '"]').val('');
+            $('#results_' + positionId).hide();
+        }
     });
     
-    // Preview functionality
+    // Enhanced Preview functionality
     $('#preview').click(function(e) {
         e.preventDefault();
         let form = $('#ballotForm').serialize();
         if(form === '') {
-            $('.message').html('You must vote for at least one candidate');
-            $('#alert').show();
+            showFloatingMessage('You must vote for at least one candidate before previewing.', 'warning');
         } else {
+            // Show loading state
+            $(this).html('<i class="fa fa-spinner fa-spin"></i> Loading Preview...');
+            $(this).prop('disabled', true);
+            
             $.ajax({
                 type: 'POST',
                 url: 'preview.php',
                 data: form,
                 dataType: 'json',
+                timeout: 15000,
                 success: function(response) {
                     if(response.error) {
                         let errmsg = '';
                         let messages = response.message;
                         for (let i in messages) {
-                            errmsg += messages[i]; 
+                            errmsg += messages[i] + '<br>'; 
                         }
-                        $('.message').html(errmsg);
-                        $('#alert').show();
+                        showFloatingMessage(errmsg, 'danger');
                     } else {
                         $('#preview_modal').modal('show');
                         $('#preview_body').html(response.list);
                     }
+                },
+                error: function(xhr, status, error) {
+                    let errorMessage = 'Failed to load preview. ';
+                    if (status === 'timeout') {
+                        errorMessage += 'Request timed out.';
+                    } else {
+                        errorMessage += 'Please try again.';
+                    }
+                    showFloatingMessage(errorMessage, 'danger');
+                },
+                complete: function() {
+                    $('#preview').html('<i class="fa fa-file-text"></i> Preview');
+                    $('#preview').prop('disabled', false);
                 }
             });
         }
     });
     
-    // Style enhancements
+    // Enhanced form submission
+    $('#ballotForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        let formData = $(this).serialize();
+        if(formData === '') {
+            showFloatingMessage('You must select at least one candidate before submitting your vote.', 'warning');
+            return false;
+        }
+        
+        if (confirm('Are you sure you want to submit your vote? This action cannot be undone.')) {
+            $('button[name="vote"]').html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
+            $('button[name="vote"]').prop('disabled', true);
+            
+            $.ajax({
+                type: 'POST',
+                url: 'submit_ballot.php',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if(response.success) {
+                        showFloatingMessage('Your vote has been submitted successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        showFloatingMessage(response.message || 'Failed to submit vote. Please try again.', 'danger');
+                        $('button[name="vote"]').html('<i class="fa fa-check-square-o"></i> Submit Vote');
+                        $('button[name="vote"]').prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    showFloatingMessage('Failed to submit vote. Please check your connection and try again.', 'danger');
+                    $('button[name="vote"]').html('<i class="fa fa-check-square-o"></i> Submit Vote');
+                    $('button[name="vote"]').prop('disabled', false);
+                }
+            });
+        }
+    });
+    
+    // Style enhancements with smoother animations
     $(document).on('mouseenter', '.candidate-item', function() {
         $(this).css({
             'border-color': '#4a90e2',
@@ -446,6 +596,11 @@ $(document).ready(function(){
             'transform': 'translateY(0)'
         });
     });
+    
+    // Close alert manually
+    $(document).on('click', '.floating-alert .close', function() {
+        $(this).closest('.floating-alert').fadeOut(500);
+    });
 });
 </script>
 
@@ -457,6 +612,45 @@ body {
 
 .content-wrapper {
     background-color: #ffffff !important;
+}
+
+/* Floating alert styles for right corner positioning */
+.floating-alert {
+    position: fixed !important;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    animation: slideInRight 0.5s ease;
+}
+
+@keyframes slideInRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-10px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.candidate-item {
+    transition: all 0.3s ease;
 }
 
 .candidate-item:hover {
@@ -480,6 +674,211 @@ body {
 
 .selected-candidate:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Loading spinner */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Enhanced button styles */
+.btn-primary:hover {
+    background-color: #357abd;
+    border-color: #357abd;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+/* Search results styling */
+.search-results {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e3f2fd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fafafa;
+}
+
+.search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-results::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 10px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+    background: #357abd;
+}
+
+/* Selected candidates area styling */
+.selected-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.selected-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.selected-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.selected-list::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .floating-alert {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .candidate-item .col-md-3,
+    .candidate-item .col-md-6,
+    .candidate-item .col-md-8 {
+        margin-bottom: 10px;
+    }
+    
+    .selected-candidate .col-md-2,
+    .selected-candidate .col-md-8 {
+        margin-bottom: 5px;
+    }
+}
+
+/* Modal enhancements */
+.modal-content {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Form enhancements */
+.box {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.box:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Alert enhancements */
+.alert {
+    border: none;
+    border-left: 4px solid;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Title styling */
+.title {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+/* Input group enhancements */
+.input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #4a90e2;
+}
+
+.input-group-btn .btn {
+    border-left: none;
+}
+
+/* Candidate photo styling */
+.candidate-item img,
+.selected-candidate img {
+    border: 2px solid #e3f2fd;
+    transition: border-color 0.3s ease;
+}
+
+.candidate-item:hover img {
+    border-color: #4a90e2;
+}
+
+/* Platform text styling */
+.candidate-item p {
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+/* Button group spacing */
+.text-center .btn {
+    margin: 0 5px;
+}
+
+@media (max-width: 576px) {
+    .text-center .btn {
+        margin: 5px 0;
+        display: block;
+        width: 100%;
+    }
 }
 </style>
 
