@@ -252,6 +252,11 @@ $(document).ready(function() {
     }
   });
   
+  // Check if DataTable is already initialized and destroy it first
+  if ($.fn.DataTable.isDataTable('#example1')) {
+    $('#example1').DataTable().destroy();
+  }
+  
   // Initialize DataTable with custom options
   $('#example1').DataTable({
     'paging': true,
