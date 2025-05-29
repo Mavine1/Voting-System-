@@ -93,11 +93,13 @@
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         <div class="modal-body">
+
           <div class="form-group">
             <label>Search Voters by Name</label>
             <input type="text" id="voterSearch" class="form-control" placeholder="Enter first or last name...">
             <small class="form-text text-muted">Type at least 2 characters to search.</small>
           </div>
+
           <div id="voterSearchResults" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
             <!-- AJAX voter search results will appear here -->
           </div>
@@ -127,8 +129,9 @@
             <label><input type="checkbox" id="addAllVoters" name="add_all_voters"> Add <strong>ALL</strong> voters as candidates (ignore search/select)</label>
           </div>
 
-          <!-- Hidden inputs for selected voters -->
+          <!-- Hidden input to hold comma-separated selected voter IDs -->
           <input type="hidden" name="selected_voters" id="selectedVotersInput">
+
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Convert to Candidates</button>
@@ -138,6 +141,119 @@
     </form>
   </div>
 </div>
+
+<script>
+$(document).ready(function(){
+  let selectedVoters = new Set();
+
+  // Debounce helper to limit AJAX calls while typing
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // Update hidden input with selected voters as CSV
+  function updateSelectedVotersInput() {
+    $('#selectedVotersInput').val(Array.from(selectedVoters).join(','));
+  }
+
+  // Render voter search results
+  function renderVoterResults(voters) {
+    const container = $('#voterSearchResults');
+    container.empty();
+
+    if (voters.length === 0) {
+      container.append('<p>No voters found.</p>');
+      return;
+    }
+
+    voters.forEach(voter => {
+      const checked = selectedVoters.has(voter.id.toString()) ? 'checked' : '';
+      const photoUrl = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
+
+      const voterHtml = `
+        <div class="form-check" style="padding: 5px 0; border-bottom: 1px solid #eee;">
+          <input class="form-check-input voter-checkbox" type="checkbox" value="${voter.id}" id="voter_${voter.id}" ${checked}>
+          <label class="form-check-label" for="voter_${voter.id}">
+            <img src="${photoUrl}" alt="Photo" style="height:30px; width:30px; border-radius:50%; object-fit:cover; margin-right:8px;">
+            ${voter.firstname} ${voter.lastname}
+          </label>
+        </div>`;
+      container.append(voterHtml);
+    });
+  }
+
+  // AJAX search function
+  const ajaxSearchVoters = debounce(function() {
+    const query = $('#voterSearch').val().trim();
+
+    if (query.length < 2) {
+      $('#voterSearchResults').empty();
+      return;
+    }
+
+    $.ajax({
+      url: 'search_voters.php',  // Your PHP search endpoint
+      type: 'POST',
+      dataType: 'json',
+      data: { search: query },
+      success: function(data) {
+        renderVoterResults(data);
+      },
+      error: function() {
+        $('#voterSearchResults').html('<p class="text-danger">Search failed. Please try again.</p>');
+      }
+    });
+  }, 300);
+
+  // Bind input event to search box
+  $('#voterSearch').on('input', function() {
+    if ($('#addAllVoters').is(':checked')) {
+      // Disable search when adding all voters
+      $('#voterSearchResults').empty();
+      return;
+    }
+    ajaxSearchVoters();
+  });
+
+  // Toggle all voters checkbox disables search & selection
+  $('#addAllVoters').change(function() {
+    if ($(this).is(':checked')) {
+      $('#voterSearch').prop('disabled', true);
+      $('#voterSearchResults').empty();
+      selectedVoters.clear();
+      updateSelectedVotersInput();
+    } else {
+      $('#voterSearch').prop('disabled', false);
+    }
+  });
+
+  // Handle selection/deselection of voters in search results
+  $('#voterSearchResults').on('change', '.voter-checkbox', function() {
+    const voterId = $(this).val();
+    if ($(this).is(':checked')) {
+      selectedVoters.add(voterId);
+    } else {
+      selectedVoters.delete(voterId);
+    }
+    updateSelectedVotersInput();
+  });
+
+  // Optional: clear selections when modal closes
+  $('#convertVoters').on('hidden.bs.modal', function () {
+    selectedVoters.clear();
+    updateSelectedVotersInput();
+    $('#voterSearch').val('').prop('disabled', false);
+    $('#voterSearchResults').empty();
+    $('#addAllVoters').prop('checked', false);
+    $('#positionSelect').val('');
+    $('#platformDesc').val('');
+  });
+});
+</script>
 
 <!-- Edit -->
 <div class="modal fade" id="edit">
