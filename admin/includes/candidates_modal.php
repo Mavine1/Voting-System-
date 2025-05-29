@@ -83,7 +83,7 @@
         </div>
     </div>
 </div>
-
+<!-- Convert Voters Modal -->
 <!-- Convert Voters Modal -->
 <div class="modal fade" id="convertVoters" tabindex="-1" role="dialog" aria-labelledby="convertVotersLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -107,12 +107,6 @@
           <!-- Search Results -->
           <div id="voterSearchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
             <p class="text-muted text-center">Search results will appear here</p>
-          </div>
-
-          <!-- Selected Voters Display -->
-          <div id="selectedVotersDisplay" class="mb-3" style="display: none;">
-            <h6>Selected Voters:</h6>
-            <div id="selectedVotersList" class="d-flex flex-wrap gap-2"></div>
           </div>
 
           <hr>
@@ -175,7 +169,7 @@
 
 <script>
 $(document).ready(function() {
-  let selectedVoters = new Map(); // Using Map to store voter objects for easy access
+  let selectedVoters = new Set();
 
   // Function to perform voter search
   function searchVoters(query) {
@@ -187,8 +181,9 @@ $(document).ready(function() {
     // Show loading indicator
     $('#voterSearchResults').html('<p class="text-muted text-center"><i class="fa fa-spinner fa-spin"></i> Searching voters...</p>');
 
+    // Simulate AJAX call with direct database query (since we're embedding in modal)
     $.ajax({
-      url: 'includes/search_voters_embedded.php',
+      url: 'includes/search_voters_embedded.php', // We'll create this
       method: 'POST',
       data: { search: query },
       dataType: 'json',
@@ -210,34 +205,7 @@ $(document).ready(function() {
 
   // Update hidden input with selected voters CSV
   function updateSelectedVotersInput() {
-    $('#selectedVotersInput').val(Array.from(selectedVoters.keys()).join(','));
-    updateSelectedVotersDisplay();
-  }
-
-  // Update the display of selected voters
-  function updateSelectedVotersDisplay() {
-    const container = $('#selectedVotersList');
-    container.empty();
-    
-    if (selectedVoters.size > 0) {
-      $('#selectedVotersDisplay').show();
-      
-      selectedVoters.forEach((voter, id) => {
-        const photo = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
-        const voterBadge = $(`
-          <div class="selected-voter-badge" style="background: #f0f0f0; padding: 5px 10px; border-radius: 20px; display: flex; align-items: center;">
-            <img src="${photo}" alt="Photo" style="height:20px; width:20px; border-radius:50%; object-fit:cover; margin-right:5px;">
-            <span>${voter.firstname} ${voter.lastname}</span>
-            <button type="button" class="btn-remove-voter" data-id="${id}" style="background: none; border: none; color: #999; margin-left: 5px; padding: 0 5px;">
-              <i class="fa fa-times"></i>
-            </button>
-          </div>
-        `);
-        container.append(voterBadge);
-      });
-    } else {
-      $('#selectedVotersDisplay').hide();
-    }
+    $('#selectedVotersInput').val(Array.from(selectedVoters).join(','));
   }
 
   // Render voters search results
@@ -257,7 +225,7 @@ $(document).ready(function() {
       const photo = voter.photo && voter.photo !== '' ? '../images/' + voter.photo : '../images/profile.jpg';
       
       const voterItem = $(`
-        <div class="list-group-item voter-item" data-id="${voter.id}" style="padding: 10px; border-radius: 5px; margin-bottom: 5px; cursor: pointer;">
+        <div class="list-group-item" style="padding: 10px; border-radius: 5px; margin-bottom: 5px;">
           <div class="d-flex align-items-center">
             <input type="checkbox" class="voter-checkbox" id="voter_${voter.id}" value="${voter.id}" 
               ${isSelected ? 'checked' : ''} style="margin-right: 10px;">
@@ -285,40 +253,11 @@ $(document).ready(function() {
   // Handle checkbox changes
   $('#voterSearchResults').on('change', '.voter-checkbox', function() {
     const voterId = $(this).val();
-    const voterItem = $(this).closest('.voter-item');
-    const voterData = {
-      id: voterId,
-      firstname: voterItem.find('h5').text().split(' ')[0],
-      lastname: voterItem.find('h5').text().split(' ')[1],
-      photo: voterItem.find('img').attr('src').replace('../images/', '')
-    };
-
     if ($(this).is(':checked')) {
-      selectedVoters.set(voterId, voterData);
+      selectedVoters.add(voterId);
     } else {
       selectedVoters.delete(voterId);
     }
-    updateSelectedVotersInput();
-  });
-
-  // Handle click on voter item (toggle selection)
-  $('#voterSearchResults').on('click', '.voter-item', function(e) {
-    // Don't toggle if clicking on the checkbox directly
-    if ($(e.target).is('input') || $(e.target).is('img')) return;
-    
-    const checkbox = $(this).find('.voter-checkbox');
-    checkbox.prop('checked', !checkbox.prop('checked'));
-    checkbox.trigger('change');
-  });
-
-  // Handle remove button click on selected voters
-  $('#selectedVotersList').on('click', '.btn-remove-voter', function() {
-    const voterId = $(this).data('id');
-    selectedVoters.delete(voterId.toString());
-    
-    // Also uncheck in search results if visible
-    $(`#voterSearchResults .voter-checkbox[value="${voterId}"]`).prop('checked', false);
-    
     updateSelectedVotersInput();
   });
 
@@ -365,7 +304,6 @@ $(document).ready(function() {
   });
 });
 </script>
-
 <!-- Edit -->
 <div class="modal fade" id="edit">
     <div class="modal-dialog">
@@ -481,3 +419,7 @@ $(document).ready(function() {
         </div>
     </div>
 </div>
+
+
+
+     
