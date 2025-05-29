@@ -1,0 +1,15 @@
+{
+    "name": "mavine/votesystem",
+    "autoload": {
+        "psr-4": {
+            "Mavine\\Votesystem\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mavine1",
+            "email": "mavinemalin@gmail.com"
+        }
+    ],
+    "require": {}
+}
