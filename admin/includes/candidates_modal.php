@@ -304,6 +304,11 @@ $(document).ready(function() {
   });
 });
 </script>
+
+
+
+<
+
 <!-- Edit -->
 <div class="modal fade" id="edit">
     <div class="modal-dialog">
