@@ -71,8 +71,8 @@
                     }
                 ?>
             </div>
-            <div class="modal-footer" style="border-top: 2px solid #059669;">
-                <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #059669; color: #ffffff; font-size: 12px; font-family: Times; border: none;" data-dismiss="modal">
+            <div class="modal-footer" style="border-top: 2px solid #1e40af;">
+                <button type="button" class="btn btn-default btn-curve pull-left" style="background-color: #1e40af; color: #ffffff; font-size: 12px; font-family: Times; border: none;" data-dismiss="modal">
                     <i class="fa fa-close"></i> Close
                 </button>
             </div>
