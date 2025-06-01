@@ -28,13 +28,13 @@ if (isset($_POST['login'])) {
         header('Location: home.php'); // Redirect to home page after successful login
         exit();
     } else {
-        $_SESSION['error'] = 'Incorrect password';
+        $_SESSION['error'] = 'Incorrect Payroll Number';
     }
 } else {
-    $_SESSION['error'] = 'Please enter a password';
+    $_SESSION['error'] = 'Please enter a Payroll Number';
 }
 
 // Redirect back to the login page if there was an error
-header('Location: index.php');
+header('Location: signin.php');
 exit();
 ?>
