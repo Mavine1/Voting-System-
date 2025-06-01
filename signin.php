@@ -134,17 +134,12 @@ if (isset($_SESSION['voter'])) {
     </div>
 
     <div class="login-box-body" style="background-color: rgba(255,255,255,0.95); color: #1e40af; font-size: 22px; font-family: Times; border-radius: 0 0 10px 10px; padding: 20px;">
-        <p class="login-box-msg" style="color: #1e40af; font-size: 16px; font-family: Times;">Sign in to start your voting session</p>
+        <p class="login-box-msg" style="color: #1e40af; font-size: 16px; font-family: Times;">Enter your password to start voting</p>
 
         <form action="login.php" method="POST">
-            <div class="form-group has-feedback">
-                <input type="text" class="form-control" name="voter" placeholder="Email or Username" required style="border: 2px solid #1e40af; border-radius: 5px; color: #1e40af;">
-                <span class="glyphicon glyphicon-user form-control-feedback" style="color: #1e40af;"></span>
-            </div>
-            
             <div class="form-group has-feedback" style="position: relative;">
-                <input type="password" class="form-control" name="password" id="password" placeholder="Password" required style="border: 2px solid #1e40af; border-radius: 5px; color: #1e40af;">
-                <span style="color: #1e40af;"></span>
+                <input type="password" class="form-control" name="password" id="password" placeholder="Enter Password" required style="border: 2px solid #1e40af; border-radius: 5px; color: #1e40af;">
+                <span class="glyphicon glyphicon-lock form-control-feedback" style="color: #1e40af;"></span>
                 <span class="password-toggle" onclick="togglePassword()">
                     <i class="fa fa-eye" id="eye-icon"></i>
                 </span>
