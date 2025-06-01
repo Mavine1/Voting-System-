@@ -134,7 +134,7 @@ if (isset($_SESSION['voter'])) {
     </div>
 
     <div class="login-box-body" style="background-color: rgba(255,255,255,0.95); color: #1e40af; font-size: 22px; font-family: Times; border-radius: 0 0 10px 10px; padding: 20px;">
-        <p class="login-box-msg" style="color: #1e40af; font-size: 16px; font-family: Times;">Enter your password to start voting</p>
+        <p class="login-box-msg" style="color: #1e40af; font-size: 16px; font-family: Times;">Enter your Payroll Number to start voting</p>
 
         <form action="login.php" method="POST">
             <div class="form-group has-feedback" style="position: relative;">
@@ -147,7 +147,7 @@ if (isset($_SESSION['voter'])) {
             <div class="row">
                 <div class="col-xs-4">
                     <button type="submit" class="btn btn-primary btn-block btn-curve" style="background-color: #1e40af; color: #ffffff; font-size: 12px; font-family: Times; border: none; border-radius: 5px; padding: 10px;" name="login">
-                        <i class="fa fa-sign-in"></i> Sign In
+                        <i class="fa fa-sign-in"></i> Vote
                     </button>
                 </div>
             </div>
