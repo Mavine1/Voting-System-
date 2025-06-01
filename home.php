@@ -202,7 +202,7 @@
                                         }
                                     ?>
                                     <div class="text-center" style="margin-top: 40px;">
-                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
+                                        <button type="button" class="btn btn-info btn-lg" style="background-color: #008000; border-color: #1e40af; color: #ffffff; margin-right: 20px; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" id="preview"><i class="fa fa-file-text"></i> Preview</button> 
                                         <button type="submit" class="btn btn-success btn-lg" style="background-color: #1e40af; border-color: #1e40af; color: #ffffff; border-radius: 5px; padding: 12px 35px; font-size: 12px; font-family: Times; font-weight: 600;" name="vote"><i class="fa fa-check-square-o"></i> Submit Vote</button>
                                     </div>
                                 </form>
@@ -321,7 +321,7 @@ $(function() {
                                     <p style="color: #1e40af; font-size: 14px; line-height: 1.4; font-family: Times;">${platform.substring(0,100)}${platform.length > 100 ? '...' : ''}</p>
                                 </div>
                                 <div class="col-md-3 text-center">
-                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #1e40af; border-color: #1e40af; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
+                                    <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #008000; border-color: #008000; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
                                 </div>
                             </div>
                         </div>`;
