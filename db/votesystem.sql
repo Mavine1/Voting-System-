@@ -36,8 +36,7 @@ CREATE TABLE `candidates` (
   `firstname` varchar(30) NOT NULL,
   `lastname` varchar(30) NOT NULL,
   `photo` varchar(150) NOT NULL,
-  `platform` text NOT NULL,
-  `remark` text,  -- New remark field added
+  `platform` text NOT NULL
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
