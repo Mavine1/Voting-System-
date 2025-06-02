@@ -130,7 +130,7 @@ if (isset($_SESSION['voter'])) {
 
 <div class="login-box" style="background-color: rgba(255,255,255,0.95); color: #1e40af; font-size: 22px; font-family: Times; border-radius: 10px; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3);">
     <div class="login-logo" style="background-color: rgba(255,255,255,0.95); color: #1e40af; font-size: 22px; font-family: Times; border-radius: 10px 10px 0 0; padding: 20px;">
-        <b>Text Book Center Awards</b>
+        <b>Text Book Center Annual Awards </b>
     </div>
 
     <div class="login-box-body" style="background-color: rgba(255,255,255,0.95); color: #1e40af; font-size: 22px; font-family: Times; border-radius: 0 0 10px 10px; padding: 20px;">
