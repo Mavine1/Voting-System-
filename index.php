@@ -399,7 +399,7 @@
                 
                 <div class="awards-section">
                     <div class="awards-number">60</div>
-                    <div class="awards-text">Text Book Centre@60 <br></div>
+                    <div class="awards-text">Text Book Centre@60 <br>Annual Awards</br></div>
                     <div class="awards-subtitle">Recognizing Outstanding Employee Performance</div>
                 </div>
                 
