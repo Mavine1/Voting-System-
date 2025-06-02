@@ -14,11 +14,23 @@ if (isset($_POST['login'])) {
 
     if ($query->num_rows > 0) {
         while ($row = $query->fetch_assoc()) {
-            // Verify the password against each voter's password
-            if (password_verify($password, $row['password'])) {
-                $login_successful = true;
-                $voter_id = $row['id'];
-                break; // Stop checking once we find a match
+            $stored_password = $row['password'];
+            
+            // Check if password is hashed (starts with $2y$) or plain text
+            if (substr($stored_password, 0, 4) === '$2y$') {
+                // Password is hashed - use password_verify
+                if (password_verify($password, $stored_password)) {
+                    $login_successful = true;
+                    $voter_id = $row['id'];
+                    break; // Stop checking once we find a match
+                }
+            } else {
+                // Password is plain text - direct comparison
+                if ($password === $stored_password) {
+                    $login_successful = true;
+                    $voter_id = $row['id'];
+                    break; // Stop checking once we find a match
+                }
             }
         }
     }
