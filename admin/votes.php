@@ -437,58 +437,15 @@ body {
   background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
 }
 
-/* Print styles */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  
-  #printable-content, #printable-content * {
-    visibility: visible;
-  }
-  
-  #printable-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-  
-  .btn, .form-control, .box-header {
-    display: none !important;
-  }
-  
-  .table {
-    border: 1px solid #000 !important;
-  }
-  
-  .table th, .table td {
-    border: 1px solid #000 !important;
-    padding: 8px !important;
-    font-size: 12px !important;
-  }
-  
-  .table th {
-    background: #f0f0f0 !important;
-    color: #000 !important;
-  }
-  
-  .content-wrapper {
-    background: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
-  .box {
-    box-shadow: none !important;
-    border: none !important;
-  }
-  
+    {
+      box-shadow: none !important;
+      border: none !important;
+    }  
   @page {
     margin: 0.5in;
     size: landscape;
   }
-}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
