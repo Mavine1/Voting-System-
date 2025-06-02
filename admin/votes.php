@@ -10,7 +10,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header" style="background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 10px; margin: 15px; box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);">
       <h1 style="margin: 0; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-        <i class="fa fa-bar-chart" style="margin-right: 10px;"></i>VOTES SUMMARY
+        <i class="fa fa-bar-chart" style="margin-right: 10px;"></i>VOTES SUMMARY WITH REMARKS
       </h1>
       <ol class="breadcrumb" style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 15px; margin-top: 10px;">
         <li><a href="#" style="color: #e0e7ff;"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -89,8 +89,11 @@
                       <th style="padding: 15px; font-weight: 600; text-align: center;">
                         <i class="fa fa-trophy" style="margin-right: 8px;"></i>Vote Count
                       </th>
-                      <th style="padding: 15px; font-weight: 600; text-align: center; border-radius: 0 10px 0 0;">
+                      <th style="padding: 15px; font-weight: 600; text-align: center;">
                         <i class="fa fa-percent" style="margin-right: 8px;"></i>Percentage
+                      </th>
+                      <th style="padding: 15px; font-weight: 600; text-align: center; border-radius: 0 10px 0 0;">
+                        <i class="fa fa-comment" style="margin-right: 8px;"></i>Recent Remarks
                       </th>
                     </tr>
                   </thead>
@@ -99,7 +102,7 @@
                       // Get filter parameter
                       $position_filter = isset($_GET['position']) ? $_GET['position'] : '';
                       
-                      // Base query to get vote counts per candidate
+                      // Base query to get vote counts per candidate with recent remarks
                       $sql = "SELECT 
                                 p.id as position_id,
                                 p.description as position_name,
@@ -108,7 +111,16 @@
                                 c.firstname as candidate_first,
                                 c.lastname as candidate_last,
                                 c.photo as candidate_photo,
-                                COUNT(v.id) as vote_count
+                                COUNT(v.id) as vote_count,
+                                GROUP_CONCAT(
+                                  CASE 
+                                    WHEN v.remarks IS NOT NULL AND v.remarks != '' 
+                                    THEN CONCAT('\"', v.remarks, '\"')
+                                    ELSE NULL 
+                                  END 
+                                  ORDER BY v.date_created DESC 
+                                  SEPARATOR ' | '
+                                ) as recent_remarks
                               FROM positions p
                               LEFT JOIN candidates c ON c.position_id = p.id
                               LEFT JOIN votes v ON v.candidate_id = c.id
@@ -218,13 +230,42 @@
                         }
                         
                         echo "</td>
+                            <td style='padding: 15px; vertical-align: middle; max-width: 300px;'>";
+                        
+                        // Display remarks
+                        if(!empty($row['recent_remarks'])) {
+                          $remarks = $row['recent_remarks'];
+                          // Limit the display length for better UI
+                          if(strlen($remarks) > 200) {
+                            $remarks = substr($remarks, 0, 200) . '...';
+                          }
+                          echo "<div style='background: #f8fafc; border-left: 3px solid #3b82f6; padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 13px; color: #475569; line-height: 1.4; max-height: 80px; overflow-y: auto;'>
+                                  <i class='fa fa-quote-left' style='color: #94a3b8; margin-right: 6px; font-size: 11px;'></i>
+                                  ".htmlspecialchars($remarks)."
+                                  <i class='fa fa-quote-right' style='color: #94a3b8; margin-left: 6px; font-size: 11px;'></i>
+                                </div>";
+                          
+                          // Show view all remarks button if there are multiple remarks
+                          if(substr_count($row['recent_remarks'], '|') > 0) {
+                            echo "<button class='btn btn-sm' onclick='showAllRemarks(\"".$row['candidate_id']."\", \"".addslashes($row['candidate_first'].' '.$row['candidate_last'])."\")' style='background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 15px; padding: 4px 12px; font-size: 11px; margin-top: 5px; transition: all 0.3s ease;'>
+                                    <i class='fa fa-eye'></i> View All
+                                  </button>";
+                          }
+                        } else {
+                          echo "<div style='text-align: center; color: #94a3b8; font-style: italic; padding: 15px; font-size: 13px;'>
+                                  <i class='fa fa-comment-o' style='margin-bottom: 5px; display: block; font-size: 16px;'></i>
+                                  No remarks yet
+                                </div>";
+                        }
+                        
+                        echo "</td>
                           </tr>
                         ";
                       }
                       
                       // Show message if no data
                       if($query->num_rows == 0) {
-                        echo "<tr><td colspan='4' style='text-align: center; color: #64748b; padding: 40px; font-style: italic;'>
+                        echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 40px; font-style: italic;'>
                                 <i class='fa fa-info-circle' style='font-size: 24px; margin-bottom: 10px; display: block;'></i>
                                 No candidates or votes found
                               </td></tr>";
@@ -264,6 +305,15 @@
                               echo "<span style='color: #fbbf24;'>".$stats_row['total_votes']."</span> Total Votes";
                               echo " | <span style='color: #a78bfa;'>".$voters_row['total_voters']."</span> Registered";
                               echo " | <span style='color: #34d399;'>".$turnout."%</span> Turnout";
+                              
+                              // Get votes with remarks count
+                              $remarks_sql = "SELECT COUNT(*) as votes_with_remarks FROM votes WHERE remarks IS NOT NULL AND remarks != ''";
+                              if(!empty($position_filter)){
+                                $remarks_sql .= " AND position_id = ".$position_filter;
+                              }
+                              $remarks_query = $conn->query($remarks_sql);
+                              $remarks_row = $remarks_query->fetch_assoc();
+                              echo " | <span style='color: #fb7185;'>".$remarks_row['votes_with_remarks']."</span> With Remarks";
                             ?>
                           </span>
                         </div>
@@ -277,6 +327,31 @@
         </div>
       </div>
     </section>
+  </div>
+  
+  <!-- Modal for viewing all remarks -->
+  <div class="modal fade" id="remarksModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0; padding: 20px;">
+          <button type="button" class="close" data-dismiss="modal" style="color: white; opacity: 0.8;">
+            <span>&times;</span>
+          </button>
+          <h4 class="modal-title" style="font-weight: 600;">
+            <i class="fa fa-comments" style="margin-right: 10px;"></i>
+            All Remarks for <span id="candidateName"></span>
+          </h4>
+        </div>
+        <div class="modal-body" id="remarksContent" style="padding: 25px; max-height: 400px; overflow-y: auto;">
+          <!-- Remarks will be loaded here -->
+        </div>
+        <div class="modal-footer" style="background: #f8fafc; border-radius: 0 0 15px 15px; padding: 15px 20px;">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); border: none; border-radius: 25px; padding: 10px 20px;">
+            <i class="fa fa-times" style="margin-right: 8px;"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   
   <?php include 'includes/footer.php'; ?>
@@ -315,7 +390,7 @@ $(document).ready(function() {
     'pageLength': 25,
     'order': [[ 0, 'asc' ], [ 2, 'desc' ]], // Order by position then by vote count
     'columnDefs': [
-      { 'orderable': false, 'targets': 3 } // Disable sorting on percentage column
+      { 'orderable': false, 'targets': [3, 4] } // Disable sorting on percentage and remarks columns
     ]
   });
   
@@ -335,6 +410,49 @@ $(document).ready(function() {
     }
   );
 });
+
+// Function to show all remarks for a candidate
+function showAllRemarks(candidateId, candidateName) {
+  $('#candidateName').text(candidateName);
+  $('#remarksContent').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><br>Loading remarks...</div>');
+  $('#remarksModal').modal('show');
+  
+  // AJAX call to get all remarks for the candidate
+  $.ajax({
+    url: 'get_candidate_remarks.php', // You'll need to create this file
+    method: 'POST',
+    data: { candidate_id: candidateId },
+    dataType: 'json',
+    success: function(response) {
+      if(response.success) {
+        var html = '';
+        if(response.remarks.length > 0) {
+          response.remarks.forEach(function(remark, index) {
+            html += '<div class="remark-item" style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin-bottom: 15px; border-radius: 0 10px 10px 0;">';
+            html += '<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 8px;">';
+            html += '<span style="font-weight: 600; color: #1e40af; font-size: 14px;"><i class="fa fa-user"></i> Voter #' + (index + 1) + '</span>';
+            html += '<span style="color: #64748b; font-size: 12px;"><i class="fa fa-clock-o"></i> ' + remark.date_created + '</span>';
+            html += '</div>';
+            html += '<div style="color: #475569; line-height: 1.5;">';
+            html += '<i class="fa fa-quote-left" style="color: #94a3b8; margin-right: 8px;"></i>';
+            html += remark.remarks;
+            html += '<i class="fa fa-quote-right" style="color: #94a3b8; margin-left: 8px;"></i>';
+            html += '</div>';
+            html += '</div>';
+          });
+        } else {
+          html = '<div class="text-center" style="color: #64748b; padding: 40px;"><i class="fa fa-comment-o fa-3x" style="margin-bottom: 15px; display: block;"></i>No remarks found for this candidate.</div>';
+        }
+        $('#remarksContent').html(html);
+      } else {
+        $('#remarksContent').html('<div class="alert alert-danger">Error loading remarks: ' + response.message + '</div>');
+      }
+    },
+    error: function() {
+      $('#remarksContent').html('<div class="alert alert-danger">Error loading remarks. Please try again.</div>');
+    }
+  });
+}
 </script>
 
 <style>
@@ -368,94 +486,4 @@ body {
 
 .alert {
   border: none;
-  margin: 15px;
-}
-
-.form-control {
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  outline: none;
-}
-
-/* Custom scrollbar for table */
-.box-body::-webkit-scrollbar {
-  height: 8px;
-}
-
-.box-body::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.box-body::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  border-radius: 4px;
-}
-
-.box-body::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .content-header {
-    margin: 10px !important;
-    padding: 15px !important;
-  }
-  
-  .box-header .row {
-    margin: 0;
-  }
-  
-  .box-header .col-md-6 {
-    margin-bottom: 15px;
-  }
-  
-  #position_filter {
-    width: 100% !important;
-  }
-  
-  .table-responsive {
-    border: none;
-  }
-  
-  .info-box-content span {
-    font-size: 14px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .content-header h1 {
-    font-size: 24px !important;
-  }
-  
-  .table > thead > tr > th,
-  .table > tbody > tr > td {
-    padding: 8px !important;
-    font-size: 12px !important;
-  }
-  
-  .btn {
-    padding: 8px 16px !important;
-    font-size: 12px !important;
-  }
-}
-
-/* Animation for leading candidates */
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
-}
-
-.fa-crown {
-  animation: pulse 2s infinite;
-}
-</style>
-
-</body>
-</html>
+  margin:
