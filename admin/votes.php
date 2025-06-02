@@ -199,7 +199,66 @@
                             <td style='padding: 15px; vertical-align: middle;'>";
                         
                         // Show candidate photo if available
-                       
+                        echo "<span style='font-weight: 500;'>".$row['candidate_first'].' '.$row['candidate_last']."</span>";
+                        
+                        if($is_leading) {
+                          echo " <span style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px;'>LEADING</span>";
+                        }
+                        
+                        echo "</td>
+                            <td style='padding: 15px; vertical-align: middle; text-align: center;'>
+                              <span style='background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);'>".$row['vote_count']."</span>
+                            </td>
+                            <td style='padding: 15px; vertical-align: middle;'>";
+                        
+                        // Enhanced progress bar for percentage
+                        if($percentage > 0) {
+                          $bar_color = $is_leading ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)';
+                          echo "<div style='background: #f1f5f9; border-radius: 25px; overflow: hidden; height: 25px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);'>
+                                  <div style='background: $bar_color; width: ".$percentage."%; height: 100%; border-radius: 25px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; transition: width 0.5s ease;'>
+                                    ".$percentage."%
+                                  </div>
+                                </div>";
+                        } else {
+                          echo "<div style='background: #f1f5f9; border-radius: 25px; height: 25px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 500; font-size: 12px;'>0%</div>";
+                        }
+                        
+                        echo "</td>
+                            <td style='padding: 15px; vertical-align: middle; max-width: 200px;'>";
+                        
+                        // Display remarks with styling
+                        if($remarks != 'No remarks') {
+                          $remarks_array = explode('; ', $remarks);
+                          $unique_remarks = array_unique(array_filter($remarks_array)); // Remove duplicates and empty values
+                          
+                          if(!empty($unique_remarks)) {
+                            echo "<div style='max-height: 60px; overflow-y: auto; font-size: 13px;'>";
+                            foreach($unique_remarks as $remark) {
+                              if(trim($remark) != '') {
+                                echo "<span style='background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 8px; font-size: 11px; margin: 1px; display: inline-block;'>".htmlspecialchars(trim($remark))."</span>";
+                              }
+                            }
+                            echo "</div>";
+                          } else {
+                            echo "<span style='color: #64748b; font-style: italic; font-size: 12px;'>No remarks</span>";
+                          }
+                        } else {
+                          echo "<span style='color: #64748b; font-style: italic; font-size: 12px;'>No remarks</span>";
+                        }
+                        
+                        echo "</td>
+                          </tr>
+                        ";
+                      }
+                      
+                      // Show message if no data
+                      if($query->num_rows == 0) {
+                        echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 40px; font-style: italic;'>
+                                <i class='fa fa-info-circle' style='font-size: 24px; margin-bottom: 10px; display: block;'></i>
+                                No candidates or votes found
+                              </td></tr>";
+                      }
+                    ?>
                   </tbody>
                 </table>
               </div>
