@@ -4,7 +4,7 @@
 
 	if(isset($_POST['vote'])){
 		if(count($_POST) == 1){
-			$_SESSION['error'][] = 'Please vote atleast one candidate';
+			$_SESSION['error'][] = 'Please vote at least one candidate';
 		}
 		else{
 			$_SESSION['post'] = $_POST;
@@ -12,6 +12,7 @@
 			$query = $conn->query($sql);
 			$error = false;
 			$sql_array = array();
+			$remark = isset($_POST['remark']) ? $_POST['remark'] : ''; // Capture remark if exists
 			while($row = $query->fetch_assoc()){
 				$position = slugify($row['description']);
 				$pos_id = $row['id'];
@@ -23,19 +24,17 @@
 						}
 						else{
 							foreach($_POST[$position] as $key => $values){
-								$sql_array[] = "INSERT INTO votes (voters_id, candidate_id, position_id) VALUES ('".$voter['id']."', '$values', '$pos_id')";
+								// Modify SQL query to include the remark
+								$sql_array[] = "INSERT INTO votes (voters_id, candidate_id, position_id, remark) VALUES ('".$voter['id']."', '$values', '$pos_id', '$remark')";
 							}
-
 						}
-						
 					}
 					else{
 						$candidate = $_POST[$position];
-						$sql_array[] = "INSERT INTO votes (voters_id, candidate_id, position_id) VALUES ('".$voter['id']."', '$candidate', '$pos_id')";
+						// Modify SQL query to include the remark
+						$sql_array[] = "INSERT INTO votes (voters_id, candidate_id, position_id, remark) VALUES ('".$voter['id']."', '$candidate', '$pos_id', '$remark')";
 					}
-
 				}
-				
 			}
 
 			if(!$error){
@@ -45,16 +44,12 @@
 
 				unset($_SESSION['post']);
 				$_SESSION['success'] = 'Ballot Submitted';
-
 			}
-
 		}
-
 	}
 	else{
 		$_SESSION['error'][] = 'Select candidates to vote first';
 	}
 
 	header('location: home.php');
-
 ?>
