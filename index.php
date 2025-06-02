@@ -407,7 +407,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">🏆</div>
                         <div class="feature-title">Employee Excellence</div>
-                        <div class="feature-description">60 awards celebrating exceptional performance, dedication, and outstanding contributions by our valued team members</div>
+                        <div class="feature-description">celebrating exceptional performance, dedication, and outstanding contributions by our valued team members</div>
                     </div>
                     
                     <div class="feature-card">
