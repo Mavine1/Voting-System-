@@ -65,6 +65,22 @@
     50% { transform: translateY(-10px) rotate(-3deg); }
     75% { transform: translateY(-15px) rotate(3deg); }
 }
+
+.platform-section {
+    background: rgba(30, 64, 175, 0.05);
+    border: 1px solid rgba(30, 64, 175, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.remarks-section {
+    background: rgba(30, 64, 175, 0.05);
+    border: 2px solid #1e40af;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+}
 </style>
 
 <body class="hold-transition skin-blue layout-top-nav">
@@ -159,6 +175,17 @@
                                         while($row = $query->fetch_assoc()){
                                             $slug = slugify($row['description']);
                                             $instruct = ($row['max_vote'] > 1) ? "You may select up to {$row['max_vote']} candidates" : "Select only one candidate";
+                                            
+                                            // Get position platform/description if available
+                                            $platform_sql = "SELECT DISTINCT platform FROM candidates WHERE position_id = '".$row['id']."' AND platform != '' LIMIT 1";
+                                            $platform_query = $conn->query($platform_sql);
+                                            $position_platform = '';
+                                            if($platform_query && $platform_query->num_rows > 0) {
+                                                $platform_row = $platform_query->fetch_assoc();
+                                                if(!empty($platform_row['platform'])) {
+                                                    $position_platform = $platform_row['platform'];
+                                                }
+                                            }
                                             ?>
                                             <div class="row">
                                                 <div class="col-xs-12">
@@ -168,6 +195,19 @@
                                                         </div>
                                                         <div class="box-body" style="padding: 25px;">
                                                             <p style="color: #1e40af; margin-bottom: 20px; font-size: 16px; font-family: Times;"><?php echo $instruct; ?></p>
+                                                            
+                                                            <?php if(!empty($position_platform)): ?>
+                                                            <!-- Platform Section -->
+                                                            <div class="platform-section">
+                                                                <h5 style="color: #1e40af; margin-bottom: 12px; font-weight: 600; font-size: 18px; font-family: Times;">
+                                                                    <i class="fa fa-info-circle"></i> Position Platform/Information:
+                                                                </h5>
+                                                                <p style="color: #1e40af; margin: 0; font-size: 14px; line-height: 1.6; font-family: Times;">
+                                                                    <?php echo nl2br(htmlspecialchars($position_platform)); ?>
+                                                                </p>
+                                                            </div>
+                                                            <?php endif; ?>
+
                                                             <!-- Search Container -->
                                                             <div class="search-container" id="search-container-<?php echo $row['id']; ?>" style="margin-bottom: 25px;">
                                                                 <div class="input-group">
@@ -193,6 +233,20 @@
                                                                 <div class="selected-list" style="min-height: 60px; border: 2px dashed #1e40af; padding: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.95);">
                                                                     <p class="text-muted text-center" style="margin: 0; color: #1e40af; font-family: Times;">No candidates selected yet</p>
                                                                 </div>
+                                                            </div>
+
+                                                            <!-- Remarks Section -->
+                                                            <div class="remarks-section" id="remarks_<?php echo $row['id']; ?>" style="display: none;">
+                                                                <h5 style="color: #1e40af; margin-bottom: 15px; font-weight: 600; font-size: 18px; font-family: Times;">
+                                                                    <i class="fa fa-comment-o"></i> Why are you voting for this candidate?
+                                                                </h5>
+                                                                <textarea class="form-control remarks-input" name="remarks_<?php echo $slug; ?>" 
+                                                                    placeholder="Share your reason for voting for this candidate (optional)..." 
+                                                                    rows="3" style="border: 2px solid #1e40af; border-radius: 8px; padding: 12px; font-size: 14px; color: #1e40af; font-family: Times; resize: vertical; min-height: 80px;"
+                                                                    data-position="<?php echo $row['id']; ?>"></textarea>
+                                                                <small style="color: #1e40af; font-style: italic; font-family: Times; margin-top: 8px; display: block;">
+                                                                    This helps improve future elections and candidate selection.
+                                                                </small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -308,17 +362,15 @@ $(function() {
 
                 let html = resp.map(c => {
                     let photo = c.photo ? 'images/' + c.photo : 'images/profile.jpg';
-                    let platform = c.platform || 'No platform information available';
                     return `
                         <div class="candidate-item" data-candidate-id="${c.id}" data-firstname="${c.firstname}"
-                             data-lastname="${c.lastname}" data-photo="${photo}" data-platform="${platform}"
+                             data-lastname="${c.lastname}" data-photo="${photo}"
                              data-position="${posId}" data-slug="${slug}" data-max-vote="${maxVote}"
                              style="border: 2px solid #1e40af; border-radius: 10px; padding: 20px; margin-bottom: 15px; background: rgba(255,255,255,0.95); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3);">
                             <div class="row">
                                 <div class="col-md-3"><img src="${photo}" style="max-height: 100px; width: 100%; object-fit: cover; border-radius: 10px;" onerror="this.src='images/profile.jpg'"></div>
                                 <div class="col-md-6">
                                     <h5 style="color: #1e40af; font-weight: 600; margin-bottom: 8px; font-size: 22px; font-family: Times;">${c.firstname} ${c.lastname}</h5>
-                                    <p style="color: #1e40af; font-size: 14px; line-height: 1.4; font-family: Times;">${platform.substring(0,100)}${platform.length > 100 ? '...' : ''}</p>
                                 </div>
                                 <div class="col-md-3 text-center">
                                     <button type="button" class="btn btn-success btn-sm select-candidate" style="background-color: #008000; border-color: #008000; border-radius: 5px; width: 100%; padding: 8px 16px; font-weight: 600; color: #ffffff; font-size: 12px; font-family: Times;"><i class="fa fa-check"></i> Select</button>
@@ -359,7 +411,6 @@ $(function() {
             firstname: $item.data('firstname'),
             lastname: $item.data('lastname'),
             photo: $item.data('photo'),
-            platform: $item.data('platform'),
             position: $item.data('position'),
             slug: $item.data('slug'),
             maxVote: $item.data('max-vote')
@@ -391,6 +442,9 @@ $(function() {
         $('#search-container-' + candidate.position).hide();
         $('#results_' + candidate.position).hide();
 
+        // Show remarks section
+        $('#remarks_' + candidate.position).slideDown();
+
         showAlert(`${candidate.firstname} ${candidate.lastname} selected!`, 'success');
     }
 
@@ -402,6 +456,7 @@ $(function() {
         if (candidates.length === 0) {
             $container.html('<p class="text-center" style="margin: 0; color: #1e40af; font-family: Times;">No candidates selected yet</p>');
             $('#search-container-' + position).show(); // Show search if none selected
+            $('#remarks_' + position).slideUp(); // Hide remarks section
         } else {
             let html = candidates.map(c => `
                 <div class="selected-candidate" style="border: 2px solid #1e40af; border-radius: 10px; padding: 15px; margin-bottom: 12px; background: rgba(255,255,255,0.95);">
@@ -409,7 +464,6 @@ $(function() {
                         <div class="col-md-2"><img src="${c.photo}" style="max-height: 60px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.src='images/profile.jpg'"></div>
                         <div class="col-md-8">
                             <h6 style="color: #1e40af; margin: 0; font-weight: 600; margin-bottom: 4px; font-size: 22px; font-family: Times;">${c.firstname} ${c.lastname}</h6>
-                            <p style="color: #1e40af; margin: 0; font-size: 14px; line-height: 1.3; font-family: Times;">${c.platform.substring(0,50)}${c.platform.length > 50 ? '...' : ''}</p>
                         </div>
                         <div class="col-md-2 text-right">
                             <button type="button" class="btn btn-danger btn-xs remove-candidate" data-position="${position}" data-candidate-id="${c.id}" style="background-color: #ef4444; border-color: #ef4444; border-radius: 5px; padding: 6px 10px; color: #ffffff; font-size: 12px; font-family: Times;" title="Remove candidate">
@@ -440,6 +494,8 @@ $(function() {
                 let slug = $('.candidate-search[data-position="' + pos + '"]').data('slug');
                 $(`input[name^="${slug}"]`).remove();
                 $('#search-container-' + pos).show();  // Show search container back when none selected
+                // Clear remarks textarea
+                $(`textarea[name="remarks_${slug}"]`).val('');
             }
 
             if (removed) showAlert(`${removed.firstname} ${removed.lastname} removed.`, 'warning');
