@@ -23,7 +23,7 @@
       <?php
         if(isset($_SESSION['error'])){
           echo "
-            <div class='alert alert-danger alert-dismissible' style='background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);'>
+            <div class='alert alert-danger alert-dismissible no-print' style='background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);'>
               <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color: white; opacity: 0.8;'>&times;</button>
               <h4><i class='icon fa fa-warning'></i> Error!</h4>
               ".$_SESSION['error']."
@@ -33,7 +33,7 @@
         }
         if(isset($_SESSION['success'])){
           echo "
-            <div class='alert alert-success alert-dismissible' style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);'>
+            <div class='alert alert-success alert-dismissible no-print' style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; border-radius: 10px; color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);'>
               <button type='button' class='close' data-dismiss='alert' aria-hidden='true' style='color: white; opacity: 0.8;'>&times;</button>
               <h4><i class='icon fa fa-check'></i> Success!</h4>
               ".$_SESSION['success']."
@@ -46,7 +46,7 @@
       <div class="row">
         <div class="col-xs-12">
           <div class="box" style="background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; overflow: hidden;">
-            <div class="box-header with-border" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-bottom: 3px solid #3b82f6; padding: 20px;">
+            <div class="box-header with-border no-print" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-bottom: 3px solid #3b82f6; padding: 20px;">
               <div class="row">
                 <div class="col-md-4">
                   <!-- Position Filter -->
@@ -79,6 +79,12 @@
             </div>
             
             <div class="box-body" style="padding: 25px;" id="printable-content">
+              <!-- Print Header (only visible when printing) -->
+              <div class="print-header" style="display: none; text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #3b82f6;">
+                <h1 style="color: #1e40af; margin: 0; font-size: 28px; font-weight: 700;">VOTES SUMMARY REPORT</h1>
+                <p style="color: #64748b; margin: 10px 0 0 0; font-size: 16px;">Generated on <?php echo date('F j, Y \a\t g:i A'); ?></p>
+              </div>
+
               <div style="overflow-x: auto;">
                 <table id="example1" class="table table-hover" style="margin: 0; border-collapse: separate; border-spacing: 0;">
                   <thead>
@@ -198,7 +204,7 @@
                         echo $row['position_name']."</td>
                             <td style='padding: 15px; vertical-align: middle;'>";
                         
-                        // Show candidate photo if available
+                        // Show candidate name
                         echo "<span style='font-weight: 500;'>".$row['candidate_first'].' '.$row['candidate_last']."</span>";
                         
                         if($is_leading) {
@@ -209,19 +215,10 @@
                             <td style='padding: 15px; vertical-align: middle; text-align: center;'>
                               <span style='background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);'>".$row['vote_count']."</span>
                             </td>
-                            <td style='padding: 15px; vertical-align: middle;'>";
+                            <td style='padding: 15px; vertical-align: middle; text-align: center;'>";
                         
-                        // Enhanced progress bar for percentage
-                        if($percentage > 0) {
-                          $bar_color = $is_leading ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)';
-                          echo "<div style='background: #f1f5f9; border-radius: 25px; overflow: hidden; height: 25px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);'>
-                                  <div style='background: $bar_color; width: ".$percentage."%; height: 100%; border-radius: 25px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; transition: width 0.5s ease;'>
-                                    ".$percentage."%
-                                  </div>
-                                </div>";
-                        } else {
-                          echo "<div style='background: #f1f5f9; border-radius: 25px; height: 25px; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 500; font-size: 12px;'>0%</div>";
-                        }
+                        // Show percentage as text for print
+                        echo "<span style='font-weight: 600; font-size: 16px; color: #1e40af;'>".$percentage."%</span>";
                         
                         echo "</td>
                             <td style='padding: 15px; vertical-align: middle; max-width: 200px;'>";
@@ -232,10 +229,11 @@
                           $unique_remarks = array_unique(array_filter($remarks_array)); // Remove duplicates and empty values
                           
                           if(!empty($unique_remarks)) {
-                            echo "<div style='max-height: 60px; overflow-y: auto; font-size: 13px;'>";
-                            foreach($unique_remarks as $remark) {
+                            echo "<div style='font-size: 13px;'>";
+                            foreach($unique_remarks as $index => $remark) {
                               if(trim($remark) != '') {
-                                echo "<span style='background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 8px; font-size: 11px; margin: 1px; display: inline-block;'>".htmlspecialchars(trim($remark))."</span>";
+                                echo htmlspecialchars(trim($remark));
+                                if($index < count($unique_remarks) - 1) echo "; ";
                               }
                             }
                             echo "</div>";
@@ -263,8 +261,8 @@
                 </table>
               </div>
               
-              <!-- Vote Summary Statistics -->
-              <div class="row" style="margin-top: 30px;">
+              <!-- Vote Summary Statistics (hidden on print) -->
+              <div class="row no-print" style="margin-top: 30px;">
                 <div class="col-md-12">
                   <div class="info-box" style="background: white; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: none; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 20px; color: white;">
@@ -300,6 +298,13 @@
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <!-- Print Footer (only visible when printing) -->
+              <div class="print-footer" style="display: none; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #64748b; font-size: 12px; margin: 0;">
+                  This report was generated automatically by the Voting System | Page 1 of 1
+                </p>
               </div>
             </div>
           </div>
@@ -431,15 +436,124 @@ body {
   background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
 }
 
-    {
-      box-shadow: none !important;
-      border: none !important;
-    }  
-  @page {
-    margin: 0.5in;
-    size: landscape;
+/* Print-specific styles */
+@media print {
+  /* Hide elements that shouldn't be printed */
+  .no-print,
+  .wrapper > .main-header,
+  .wrapper > .main-sidebar,
+  .content-wrapper > .content-header,
+  .box-header,
+  .dataTables_wrapper .dataTables_length,
+  .dataTables_wrapper .dataTables_filter,
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate,
+  .dataTables_wrapper .dataTables_processing {
+    display: none !important;
   }
+  
+  /* Show print-only elements */
+  .print-header,
+  .print-footer {
+    display: block !important;
+  }
+  
+  /* Reset page styles for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .content-wrapper {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .box {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+  
+  .box-body {
+    padding: 0 !important;
+  }
+  
+  /* Table styles for print */
+  .table {
+    width: 100% !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  
+  .table > thead > tr > th {
+    background: #f8fafc !important;
+    color: #1e40af !important;
+    border: 1px solid #d1d5db !important;
+    padding: 8px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+  
+  .table > tbody > tr > td {
+    border: 1px solid #d1d5db !important;
+    padding: 8px !important;
+    font-size: 10px !important;
+    vertical-align: top !important;
+  }
+  
+  /* Remove hover effects and gradients for print */
+  .table > tbody > tr {
+    background: white !important;
+  }
+  
+  .table > tbody > tr:nth-child(even) {
+    background: #f9fafb !important;
+  }
+  
+  /* Simplify vote count display for print */
+  .table > tbody > tr > td span {
+    background: none !important;
+    color: #1e40af !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Remove icons for print */
+  .fa {
+    display: none !important;
+  }
+  
+  /* Ensure table fits on page */
+  .table {
+    page-break-inside: auto;
+  }
+  
+  .table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  
+  .table thead {
+    display: table-header-group;
+  }
+  
+  .table tfoot {
+    display: table-footer-group;
+  }
+}
 
+@page {
+  margin: 0.5in;
+  size: landscape;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -527,6 +641,64 @@ body {
 .table td:last-child div::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 2px;
+}
+
+/* Print-specific table styling */
+@media print {
+  /* Print header styling */
+  .print-header h1 {
+    color: #1e40af !important;
+    font-size: 24px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .print-header p {
+    color: #64748b !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+  }
+  
+  /* Clean table appearance for print */
+  .table > tbody > tr > td:first-child {
+    font-weight: 600 !important;
+    color: #1e40af !important;
+  }
+  
+  .table > tbody > tr > td:nth-child(2) {
+    font-weight: 500 !important;
+  }
+  
+  .table > tbody > tr > td:nth-child(3) {
+    text-align: center !important;
+    font-weight: 700 !important;
+    color: #1e40af !important;
+  }
+  
+  .table > tbody > tr > td:nth-child(4) {
+    text-align: center !important;
+    font-weight: 600 !important;
+    color: #1e40af !important;
+  }
+  
+  .table > tbody > tr > td:last-child {
+    font-size: 9px !important;
+    max-width: none !important;
+  }
+  
+  /* Remove special styling elements for print */
+  .table > tbody > tr > td span[style*="LEADING"] {
+    display: none !important;
+  }
+  
+  /* Print footer styling */
+  .print-footer {
+    page-break-inside: avoid;
+  }
+  
+  .print-footer p {
+    font-size: 10px !important;
+    color: #64748b !important;
+  }
 }
 </style>
 
