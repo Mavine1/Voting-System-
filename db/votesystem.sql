@@ -48,6 +48,7 @@ CREATE TABLE `positions` (
   `description` varchar(50) NOT NULL,
   `max_vote` int(11) NOT NULL,
   `priority` int(11) NOT NULL,
+  `platform` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
