@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 25px;">
                         <label for="max_vote" class="col-sm-3 control-label" style="color: #1e40af; font-weight: 500; padding-top: 10px; text-align: right;">
                             <i class="fa fa-sort-numeric-asc" style="margin-right: 5px;"></i>Maximum Vote
                         </label>
@@ -38,6 +38,19 @@
                                    placeholder="Enter maximum votes allowed"
                                    onfocus="this.style.borderColor='#1e40af'; this.style.boxShadow='0 0 0 3px rgba(30, 64, 175, 0.1)'" 
                                    onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="platform" class="col-sm-3 control-label" style="color: #1e40af; font-weight: 500; padding-top: 10px; text-align: right;">
+                            <i class="fa fa-list-alt" style="margin-right: 5px;"></i>Platform Description
+                        </label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="platform" name="platform" rows="5" required
+                                      style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px 15px; font-size: 14px; transition: all 0.3s ease; background: #ffffff; resize: vertical; min-height: 120px;" 
+                                      placeholder="Enter platform description..."
+                                      onfocus="this.style.borderColor='#1e40af'; this.style.boxShadow='0 0 0 3px rgba(30, 64, 175, 0.1)'" 
+                                      onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
                         </div>
                     </div>
                 </form>
@@ -93,7 +106,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 25px;">
                         <label for="edit_max_vote" class="col-sm-3 control-label" style="color: #1e40af; font-weight: 500; padding-top: 10px; text-align: right;">
                             <i class="fa fa-sort-numeric-asc" style="margin-right: 5px;"></i>Maximum Vote
                         </label>
@@ -103,6 +116,19 @@
                                    placeholder="Enter maximum votes allowed"
                                    onfocus="this.style.borderColor='#1e40af'; this.style.boxShadow='0 0 0 3px rgba(30, 64, 175, 0.1)'" 
                                    onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="edit_platform" class="col-sm-3 control-label" style="color: #1e40af; font-weight: 500; padding-top: 10px; text-align: right;">
+                            <i class="fa fa-list-alt" style="margin-right: 5px;"></i>Platform Description
+                        </label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="edit_platform" name="platform" rows="5" required
+                                      style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px 15px; font-size: 14px; transition: all 0.3s ease; background: #ffffff; resize: vertical; min-height: 120px;" 
+                                      placeholder="Enter platform description..."
+                                      onfocus="this.style.borderColor='#1e40af'; this.style.boxShadow='0 0 0 3px rgba(30, 64, 175, 0.1)'" 
+                                      onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
                         </div>
                     </div>
                 </form>
@@ -315,7 +341,7 @@ $(document).ready(function() {
     });
     
     // Enhanced form validation
-    $('input[required]').on('blur', function() {
+    $('input[required], textarea[required]').on('blur', function() {
         const input = $(this);
         if (!input.val().trim()) {
             input.css({
@@ -332,16 +358,17 @@ $(document).ready(function() {
     
     // Reset form styles when modal is closed
     $('.modal').on('hidden.bs.modal', function() {
-        $(this).find('input').css({
+        $(this).find('input, textarea').css({
             'border-color': '#e5e7eb',
             'box-shadow': 'none'
         });
         $(this).find('button[type="submit"]').removeClass('btn-loading').prop('disabled', false);
+        $(this).find('form')[0].reset();
     });
     
     // Auto-focus first input when modal opens
     $('.modal').on('shown.bs.modal', function() {
-        $(this).find('input[type="text"], input[type="number"]').first().focus();
+        $(this).find('input[type="text"], input[type="number"], textarea').first().focus();
     });
     
     // Keyboard navigation
@@ -350,6 +377,32 @@ $(document).ready(function() {
             e.preventDefault();
             $(this).find('button[type="submit"]').click();
         }
+    });
+    
+    // Character counter for textarea
+    $('textarea[name="platform"]').on('input', function() {
+        const maxLength = 500; // Set your desired max length
+        const currentLength = $(this).val().length;
+        
+        // Create counter if it doesn't exist
+        if (!$(this).next('.char-counter').length) {
+            $(this).after('<div class="char-counter" style="text-align: right; font-size: 12px; color: #6b7280; margin-top: 5px;"></div>');
+        }
+        
+        const counter = $(this).next('.char-counter');
+        counter.html(`${currentLength} characters`);
+        
+        if (currentLength > maxLength * 0.9) {
+            counter.css('color', '#ef4444');
+        } else {
+            counter.css('color', '#6b7280');
+        }
+    });
+    
+    // Auto-resize textarea
+    $('textarea').on('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
     });
 });
 </script>
