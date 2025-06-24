@@ -204,173 +204,180 @@ include 'includes/header.php';
 
 <?php include 'includes/scripts.php'; ?>
 
-<?php include 'includes/scripts.php'; ?>
-
-<!-- Chart.js Scripts with Top 5 Candidates per Position -->
+<!-- Chart.js Scripts with Top 5 Candidates per Position (Only candidates with votes) -->
 <?php
 $sql = "SELECT * FROM positions ORDER BY priority ASC";
 $query = $conn->query($sql);
 while($row = $query->fetch_assoc()){
-    // Get all candidates for this position
-    $sql = "SELECT * FROM candidates WHERE position_id = '".$row['id']."' ORDER BY lastname ASC";
+    // Get candidates with their vote counts, sorted by votes DESC
+    $sql = "SELECT c.*, COUNT(v.candidate_id) as vote_count 
+            FROM candidates c 
+            LEFT JOIN votes v ON c.id = v.candidate_id 
+            WHERE c.position_id = '".$row['id']."' 
+            GROUP BY c.id 
+            HAVING vote_count > 0 
+            ORDER BY vote_count DESC, c.lastname ASC 
+            LIMIT 5";
     $cquery = $conn->query($sql);
     
     $carray = array();
     $varray = array();
-    $candidate_count = 0;
     
-    // Get actual candidates and their votes
+    // Get candidates who have at least 1 vote
     while($crow = $cquery->fetch_assoc()){
         array_push($carray, $crow['lastname']);
-        $sql = "SELECT * FROM votes WHERE candidate_id = '".$crow['id']."'";
-        $vquery = $conn->query($sql);
-        array_push($varray, $vquery->num_rows);
-        $candidate_count++;
-        
-        // Limit to top 5 candidates
-        if($candidate_count >= 5) break;
+        array_push($varray, intval($crow['vote_count']));
     }
     
-    // If we have less than 5 candidates, fill with empty entries
-    while(count($carray) < 5){
-        array_push($carray, 'No Candidate');
-        array_push($varray, 0);
-    }
-    
-    // Sort arrays by vote count (descending) while keeping candidate names aligned
-    $combined = array_combine($carray, $varray);
-    arsort($combined);
-    $carray = array_keys($combined);
-    $varray = array_values($combined);
-    
-    $carray = json_encode($carray);
-    $varray = json_encode($varray);
-    ?>
-    <script>
-    $(function(){
-        var rowid = '<?php echo $row['id']; ?>';
-        var description = '<?php echo slugify($row['description']); ?>';
-        var barChartCanvas = $('#'+description).get(0);
-        
-        if(barChartCanvas){
-            var ctx = barChartCanvas.getContext('2d');
+    // Only create chart if there are candidates with votes
+    if(count($carray) > 0){
+        $carray = json_encode($carray);
+        $varray = json_encode($varray);
+        ?>
+        <script>
+        $(function(){
+            var rowid = '<?php echo $row['id']; ?>';
+            var description = '<?php echo slugify($row['description']); ?>';
+            var barChartCanvas = $('#'+description).get(0);
             
-            // Check if Chart.js is loaded
-            if(typeof Chart !== 'undefined'){
-                var barChart = new Chart(ctx, {
-                    type: 'horizontalBar',
-                    data: {
+            if(barChartCanvas){
+                var ctx = barChartCanvas.getContext('2d');
+                
+                // Check if Chart.js is loaded
+                if(typeof Chart !== 'undefined'){
+                    var barChart = new Chart(ctx, {
+                        type: 'horizontalBar',
+                        data: {
+                            labels: <?php echo $carray; ?>,
+                            datasets: [{
+                                label: 'Votes',
+                                data: <?php echo $varray; ?>,
+                                backgroundColor: [
+                                    'rgba(30, 64, 175, 0.8)',
+                                    'rgba(220, 38, 38, 0.8)',
+                                    'rgba(5, 150, 105, 0.8)',
+                                    'rgba(124, 58, 237, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)'
+                                ],
+                                borderColor: [
+                                    'rgba(30, 64, 175, 1)',
+                                    'rgba(220, 38, 38, 1)',
+                                    'rgba(5, 150, 105, 1)',
+                                    'rgba(124, 58, 237, 1)',
+                                    'rgba(245, 158, 11, 1)'
+                                ],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: 'white',
+                                    bodyColor: 'white',
+                                    borderColor: 'rgba(59, 130, 246, 1)',
+                                    borderWidth: 1,
+                                    cornerRadius: 8,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Votes: ' + context.parsed.x;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#374151',
+                                        font: { weight: '600' },
+                                        stepSize: 1
+                                    }
+                                },
+                                y: {
+                                    grid: { display: false },
+                                    ticks: {
+                                        color: '#374151',
+                                        font: { weight: '600' },
+                                        callback: function(value) {
+                                            const label = this.getLabelForValue(value);
+                                            return label.length > 15 ? label.substr(0, 15) + '...' : label;
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeInOutQuart'
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback for older Chart.js versions
+                    var barChart = new Chart(ctx);
+                    var barChartData = {
                         labels: <?php echo $carray; ?>,
                         datasets: [{
                             label: 'Votes',
-                            data: <?php echo $varray; ?>,
-                            backgroundColor: [
-                                'rgba(30, 64, 175, 0.8)',
-                                'rgba(220, 38, 38, 0.8)',
-                                'rgba(5, 150, 105, 0.8)',
-                                'rgba(124, 58, 237, 0.8)',
-                                'rgba(245, 158, 11, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(30, 64, 175, 1)',
-                                'rgba(220, 38, 38, 1)',
-                                'rgba(5, 150, 105, 1)',
-                                'rgba(124, 58, 237, 1)',
-                                'rgba(245, 158, 11, 1)'
-                            ],
-                            borderWidth: 2
+                            fillColor: 'rgba(60,141,188,0.9)',
+                            strokeColor: 'rgba(60,141,188,0.8)',
+                            pointColor: '#3b8bba',
+                            pointStrokeColor: 'rgba(60,141,188,1)',
+                            pointHighlightFill: '#fff',
+                            pointHighlightStroke: 'rgba(60,141,188,1)',
+                            data: <?php echo $varray; ?>
                         }]
-                    },
-                    options: {
+                    };
+                    
+                    var barChartOptions = {
+                        scaleBeginAtZero: true,
+                        scaleShowGridLines: true,
+                        scaleGridLineColor: 'rgba(0,0,0,.05)',
+                        scaleGridLineWidth: 1,
+                        scaleShowHorizontalLines: true,
+                        scaleShowVerticalLines: true,
+                        barShowStroke: true,
+                        barStrokeWidth: 2,
+                        barValueSpacing: 5,
+                        barDatasetSpacing: 1,
                         responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleColor: 'white',
-                                bodyColor: 'white',
-                                borderColor: 'rgba(59, 130, 246, 1)',
-                                borderWidth: 1,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Votes: ' + context.parsed.x;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
-                                },
-                                ticks: {
-                                    color: '#374151',
-                                    font: { weight: '600' },
-                                    stepSize: 1
-                                }
-                            },
-                            y: {
-                                grid: { display: false },
-                                ticks: {
-                                    color: '#374151',
-                                    font: { weight: '600' },
-                                    callback: function(value) {
-                                        const label = this.getLabelForValue(value);
-                                        return label.length > 15 ? label.substr(0, 15) + '...' : label;
-                                    }
-                                }
-                            }
-                        },
-                        animation: {
-                            duration: 1500,
-                            easing: 'easeInOutQuart'
-                        }
-                    }
-                });
-            } else {
-                // Fallback for older Chart.js versions
-                var barChart = new Chart(ctx);
-                var barChartData = {
-                    labels: <?php echo $carray; ?>,
-                    datasets: [{
-                        label: 'Votes',
-                        fillColor: 'rgba(60,141,188,0.9)',
-                        strokeColor: 'rgba(60,141,188,0.8)',
-                        pointColor: '#3b8bba',
-                        pointStrokeColor: 'rgba(60,141,188,1)',
-                        pointHighlightFill: '#fff',
-                        pointHighlightStroke: 'rgba(60,141,188,1)',
-                        data: <?php echo $varray; ?>
-                    }]
-                };
-                
-                var barChartOptions = {
-                    scaleBeginAtZero: true,
-                    scaleShowGridLines: true,
-                    scaleGridLineColor: 'rgba(0,0,0,.05)',
-                    scaleGridLineWidth: 1,
-                    scaleShowHorizontalLines: true,
-                    scaleShowVerticalLines: true,
-                    barShowStroke: true,
-                    barStrokeWidth: 2,
-                    barValueSpacing: 5,
-                    barDatasetSpacing: 1,
-                    responsive: true,
-                    maintainAspectRatio: false
-                };
-                
-                barChartOptions.datasetFill = false;
-                var myChart = barChart.HorizontalBar(barChartData, barChartOptions);
+                        maintainAspectRatio: false
+                    };
+                    
+                    barChartOptions.datasetFill = false;
+                    var myChart = barChart.HorizontalBar(barChartData, barChartOptions);
+                }
             }
-        }
-    });
-    </script>
-<?php
+        });
+        </script>
+        <?php
+    } else {
+        // If no candidates have votes, show a message in the chart area
+        ?>
+        <script>
+        $(function(){
+            var description = '<?php echo slugify($row['description']); ?>';
+            var barChartCanvas = $('#'+description).get(0);
+            
+            if(barChartCanvas){
+                var ctx = barChartCanvas.getContext('2d');
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "#666";
+                ctx.textAlign = "center";
+                ctx.fillText("No votes cast yet for this position", barChartCanvas.width/2, barChartCanvas.height/2);
+            }
+        });
+        </script>
+        <?php
+    }
 }
 ?>
 
