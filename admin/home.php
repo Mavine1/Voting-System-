@@ -145,23 +145,19 @@ include 'includes/header.php';
 
 <!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
+// Enhanced Chart Configuration
 const chartColors = [
-    '#3b82f6',
-    '#10b981',
-    '#f59e0b',
-    '#ef4444',
-    '#8b5cf6'
+    '#3b82f6', '#10b981', '#a855f7', '#ef4444', '#f59e0b'
 ];
 
 const chartConfig = {
-    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
+    indexAxis: 'y',
     plugins: {
-        legend: {
-            display: false
-        },
+        legend: { display: false },
         tooltip: {
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             titleColor: '#f1f5f9',
@@ -222,7 +218,6 @@ const chartConfig = {
             borderSkipped: false
         }
     }
-
 };
 
 function createChart(canvasId, labels, data, positionName) {
@@ -271,111 +266,110 @@ function showNoDataMessage(canvasId, positionName) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    ctx.fillText("No votes cast yet", canvas.
+    ctx.fillText("No votes cast yet", canvas.width/2, canvas.height/2 - 10);
+    ctx.font = "12px 'Segoe UI'";
+    ctx.fillStyle = "#9ca3af";
+    ctx.fillText("Charts will appear when voting begins", canvas.width/2, canvas.height/2 + 15);
+}
+
+// Initialize Charts
+$(document).ready(function() {
+    setTimeout(function() {
+        <?php
+        $sql = "SELECT * FROM positions ORDER BY priority ASC";
+        $query = $conn->query($sql);
+        while($row = $query->fetch_assoc()){
+            $sql_candidates = "SELECT c.*, COUNT(v.candidate_id) as vote_count 
+                             FROM candidates c 
+                             LEFT JOIN votes v ON c.id = v.candidate_id 
+                             WHERE c.position_id = '".$row['id']."' 
+                             GROUP BY c.id 
+                             ORDER BY vote_count DESC, c.lastname ASC 
+                             LIMIT 5";
+            $cquery = $conn->query($sql_candidates);
+            
+            $candidate_names = array();
+            $vote_counts = array();
+            $has_votes = false;
+            
+            while($crow = $cquery->fetch_assoc()){
+                $full_name = trim($crow['firstname'] . ' ' . $crow['lastname']);
+                $vote_count = intval($crow['vote_count']);
+                
+                if($vote_count > 0) {
+                    array_push($candidate_names, $full_name);
+                    array_push($vote_counts, $vote_count);
+                    $has_votes = true;
+                }
+            }
+            
+            $canvas_id = slugify($row['description']);
+            $position_name = htmlspecialchars($row['description']);
+            
+            if($has_votes && count($candidate_names) > 0) {
+                $names_json = json_encode($candidate_names);
+                $votes_json = json_encode($vote_counts);
+                echo "createChart('$canvas_id', $names_json, $votes_json, '$position_name');\n";
+            } else {
+                echo "showNoDataMessage('$canvas_id', '$position_name');\n";
+            }
+        }
+        ?>
+    }, 300);
+});
+</script>
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.small-box {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.small-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+}
+
+.box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+}
+
+@media (max-width: 768px) {
+    .content-header {
+        margin: 10px !important;
+        padding: 20px !important;
+    }
+    .chart-container {
+        height: 250px !important;
+    }
+}
+
+@keyframes fadeInUp {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.box {
+    animation: fadeInUp 0.6s ease-out;
+}
+</style>
+
+</body>
+</html>
