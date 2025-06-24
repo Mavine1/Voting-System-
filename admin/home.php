@@ -146,18 +146,16 @@ include 'includes/header.php';
 <!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-<script>
-// Enhanced Chart Configuration
-const chartColors = [
-    '#3b82f6', '#10b981', '#a855f7', '#ef4444', '#f59e0b'
-];
+
 
 const chartConfig = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: 'y',
     plugins: {
-        legend: { display: false },
+        legend: {
+            display: false
+        },
         tooltip: {
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             titleColor: '#f1f5f9',
@@ -218,9 +216,9 @@ const chartConfig = {
             borderSkipped: false
         }
     }
-};
 
-function createChart(canvasId, labels, data, positionName) {
+
+};function createChart(canvasId, labels, data, positionName) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     
