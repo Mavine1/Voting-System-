@@ -153,7 +153,7 @@ include 'includes/header.php';
             <h3 style="margin: 0; font-weight: 700; color: #1e40af; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; align-items: center; justify-content: space-between;">
               <span>
                 <i class="fa fa-chart-bar" style="margin-right: 12px; color: #3b82f6;"></i>
-                <b>VOTES TALLY - TOP 5 CANDIDATES</b>
+                <b>VOTES TALLY - TOP CANDIDATES</b>
               </span>
               <a href="print.php" class="btn btn-curve" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 25px; border: none; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); text-decoration: none; transition: all 0.3s ease;">
                 <i class="fa fa-print" style="margin-right: 8px;"></i> Print Report
@@ -178,7 +178,7 @@ include 'includes/header.php';
                 <h4 class="box-title" style="margin: 0; font-weight: 700; color: #1e40af; font-size: 18px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                   <i class="fa fa-trophy" style="margin-right: 10px; color: #f59e0b;"></i>
                   <b><?= htmlspecialchars($row['description']) ?></b>
-                  <span style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px; margin-left: 10px;">TOP 5</span>
+                  <span style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px; margin-left: 10px;">TOP CANDIDATES</span>
                 </h4>
               </div>
               <div class="box-body" style="padding: 25px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
@@ -204,20 +204,31 @@ include 'includes/header.php';
 
 <?php include 'includes/scripts.php'; ?>
 
-<!-- Chart.js Scripts with Enhanced Top 5 Candidates Display -->
+<!-- Chart.js Scripts with Enhanced Top Candidates Display -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
 // Chart color palette
 const chartColors = [
-    '#1e40af', // Blue
-    '#dc2626', // Red  
-    '#059669', // Green
-    '#7c3aed', // Purple
-    '#f59e0b', // Yellow
-    '#0891b2', // Cyan
-    '#7c2d12', // Brown
-    '#86198f'  // Pink
+    'rgba(30, 64, 175, 0.8)',    // Blue
+    'rgba(220, 38, 38, 0.8)',    // Red  
+    'rgba(5, 150, 105, 0.8)',    // Green
+    'rgba(124, 58, 237, 0.8)',   // Purple
+    'rgba(245, 158, 11, 0.8)',   // Yellow
+    'rgba(8, 145, 178, 0.8)',    // Cyan
+    'rgba(124, 45, 18, 0.8)',    // Brown
+    'rgba(134, 25, 143, 0.8)'    // Pink
+];
+
+const borderColors = [
+    'rgba(30, 64, 175, 1)',
+    'rgba(220, 38, 38, 1)',
+    'rgba(5, 150, 105, 1)',
+    'rgba(124, 58, 237, 1)',
+    'rgba(245, 158, 11, 1)',
+    'rgba(8, 145, 178, 1)',
+    'rgba(124, 45, 18, 1)',
+    'rgba(134, 25, 143, 1)'
 ];
 
 // Chart configuration object
@@ -243,8 +254,9 @@ const chartDefaults = {
                 },
                 label: function(context) {
                     const value = context.parsed.x;
-                    const plural = value !== 1 ? 's' : '';
-                    return `Vote${plural}: ${value}`;
+                    const total = context.chart.data.total;
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    return `${value} votes (${percentage}%)`;
                 }
             }
         }
@@ -323,14 +335,16 @@ function createChart(canvasId, labels, data, positionName) {
     
     const ctx = canvas.getContext('2d');
     
+    // Calculate total votes
+    const totalVotes = data.reduce((sum, current) => sum + current, 0);
+    
     // Generate colors for bars
     const backgroundColors = [];
     const borderColors = [];
     
     for(let i = 0; i < data.length; i++) {
-        const color = chartColors[i % chartColors.length];
-        backgroundColors.push(color);
-        borderColors.push(color);
+        backgroundColors.push(chartColors[i % chartColors.length]);
+        borderColors.push(borderColors[i % borderColors.length]);
     }
     
     const chartData = {
@@ -343,13 +357,29 @@ function createChart(canvasId, labels, data, positionName) {
             borderWidth: 2,
             borderRadius: 6,
             borderSkipped: false
-        }]
+        }],
+        total: totalVotes // Store total for percentage calculation
+    };
+    
+    // Add percentage to labels
+    const percentageLabels = labels.map((label, index) => {
+        const percentage = totalVotes > 0 ? ((data[index] / totalVotes) * 100).toFixed(1) : 0;
+        return `${label} (${percentage}%)`;
+    });
+    
+    // Clone the default options to avoid modifying the original
+    const options = JSON.parse(JSON.stringify(chartDefaults));
+    
+    // Update labels to include percentages
+    options.scales.y.ticks.callback = function(value) {
+        const label = percentageLabels[value];
+        return label.length > 25 ? label.substr(0, 25) + '...' : label;
     };
     
     new Chart(ctx, {
         type: 'bar',
         data: chartData,
-        options: chartDefaults
+        options: options
     });
 }
 
@@ -397,7 +427,7 @@ $(document).ready(function() {
         $sql = "SELECT * FROM positions ORDER BY priority ASC";
         $query = $conn->query($sql);
         while($row = $query->fetch_assoc()){
-            // Get top 5 candidates with their vote counts
+            // Get candidates with their vote counts
             $sql_candidates = "SELECT c.*, COUNT(v.candidate_id) as vote_count 
                              FROM candidates c 
                              LEFT JOIN votes v ON c.id = v.candidate_id 
