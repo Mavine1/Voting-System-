@@ -222,138 +222,151 @@ while($row = $query->fetch_assoc()){
     
     $carray = array();
     $varray = array();
+    $candidate_full_names = array();
     
     // Get candidates who have at least 1 vote
     while($crow = $cquery->fetch_assoc()){
-        array_push($carray, $crow['lastname']);
+        // Create full name for display
+        $full_name = trim($crow['firstname'] . ' ' . $crow['lastname']);
+        array_push($candidate_full_names, $full_name);
+        array_push($carray, $crow['lastname']); // Keep lastname for backward compatibility
         array_push($varray, intval($crow['vote_count']));
     }
     
     // Only create chart if there are candidates with votes
     if(count($carray) > 0){
-        $carray = json_encode($carray);
-        $varray = json_encode($varray);
+        $carray_json = json_encode($candidate_full_names); // Use full names for display
+        $varray_json = json_encode($varray);
+        $candidate_count = count($carray);
         ?>
         <script>
         $(function(){
             var rowid = '<?php echo $row['id']; ?>';
             var description = '<?php echo slugify($row['description']); ?>';
             var barChartCanvas = $('#'+description).get(0);
+            var candidateCount = <?php echo $candidate_count; ?>;
             
             if(barChartCanvas){
                 var ctx = barChartCanvas.getContext('2d');
                 
-                // Check if Chart.js is loaded
+                // Define colors for bars
+                var colors = [
+                    '#1e40af', // Blue
+                    '#dc2626', // Red  
+                    '#059669', // Green
+                    '#7c3aed', // Purple
+                    '#f59e0b'  // Yellow
+                ];
+                
+                var backgroundColors = [];
+                var borderColors = [];
+                
+                // Generate colors based on number of candidates
+                for(var i = 0; i < candidateCount; i++) {
+                    backgroundColors.push(colors[i % colors.length]);
+                    borderColors.push(colors[i % colors.length]);
+                }
+                
+                // Check if Chart.js is loaded and create chart
                 if(typeof Chart !== 'undefined'){
-                    var barChart = new Chart(ctx, {
-                        type: 'horizontalBar',
-                        data: {
-                            labels: <?php echo $carray; ?>,
-                            datasets: [{
-                                label: 'Votes',
-                                data: <?php echo $varray; ?>,
-                                backgroundColor: [
-                                    'rgba(30, 64, 175, 0.8)',
-                                    'rgba(220, 38, 38, 0.8)',
-                                    'rgba(5, 150, 105, 0.8)',
-                                    'rgba(124, 58, 237, 0.8)',
-                                    'rgba(245, 158, 11, 0.8)'
-                                ],
-                                borderColor: [
-                                    'rgba(30, 64, 175, 1)',
-                                    'rgba(220, 38, 38, 1)',
-                                    'rgba(5, 150, 105, 1)',
-                                    'rgba(124, 58, 237, 1)',
-                                    'rgba(245, 158, 11, 1)'
-                                ],
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    titleColor: 'white',
-                                    bodyColor: 'white',
-                                    borderColor: 'rgba(59, 130, 246, 1)',
-                                    borderWidth: 1,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Votes: ' + context.parsed.x;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    grid: {
-                                        color: 'rgba(0, 0, 0, 0.1)'
-                                    },
-                                    ticks: {
-                                        color: '#374151',
-                                        font: { weight: '600' },
-                                        stepSize: 1
-                                    }
-                                },
-                                y: {
-                                    grid: { display: false },
-                                    ticks: {
-                                        color: '#374151',
-                                        font: { weight: '600' },
-                                        callback: function(value) {
-                                            const label = this.getLabelForValue(value);
-                                            return label.length > 15 ? label.substr(0, 15) + '...' : label;
-                                        }
-                                    }
-                                }
-                            },
-                            animation: {
-                                duration: 1500,
-                                easing: 'easeInOutQuart'
-                            }
-                        }
-                    });
-                } else {
-                    // Fallback for older Chart.js versions
-                    var barChart = new Chart(ctx);
-                    var barChartData = {
-                        labels: <?php echo $carray; ?>,
+                    var chartData = {
+                        labels: <?php echo $carray_json; ?>,
                         datasets: [{
                             label: 'Votes',
-                            fillColor: 'rgba(60,141,188,0.9)',
-                            strokeColor: 'rgba(60,141,188,0.8)',
-                            pointColor: '#3b8bba',
-                            pointStrokeColor: 'rgba(60,141,188,1)',
-                            pointHighlightFill: '#fff',
-                            pointHighlightStroke: 'rgba(60,141,188,1)',
-                            data: <?php echo $varray; ?>
+                            data: <?php echo $varray_json; ?>,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false
                         }]
                     };
                     
-                    var barChartOptions = {
-                        scaleBeginAtZero: true,
-                        scaleShowGridLines: true,
-                        scaleGridLineColor: 'rgba(0,0,0,.05)',
-                        scaleGridLineWidth: 1,
-                        scaleShowHorizontalLines: true,
-                        scaleShowVerticalLines: true,
-                        barShowStroke: true,
-                        barStrokeWidth: 2,
-                        barValueSpacing: 5,
-                        barDatasetSpacing: 1,
+                    var chartOptions = {
                         responsive: true,
-                        maintainAspectRatio: false
+                        maintainAspectRatio: false,
+                        indexAxis: 'y', // This makes it horizontal
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        var plural = context.parsed.x !== 1 ? 's' : '';
+                                        return 'Vote' + plural + ': ' + context.parsed.x;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#374151',
+                                    font: { weight: '600' },
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : '';
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Votes',
+                                    color: '#374151',
+                                    font: { weight: 'bold', size: 12 }
+                                }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: '#374151',
+                                    font: { weight: '600' },
+                                    callback: function(value) {
+                                        const label = this.getLabelForValue(value);
+                                        return label.length > 20 ? label.substr(0, 20) + '...' : label;
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Candidates',
+                                    color: '#374151',
+                                    font: { weight: 'bold', size: 12 }
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeInOutQuart'
+                        },
+                        elements: {
+                            bar: {
+                                borderRadius: 8
+                            }
+                        }
                     };
                     
-                    barChartOptions.datasetFill = false;
-                    var myChart = barChart.HorizontalBar(barChartData, barChartOptions);
+                    var barChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: chartData,
+                        options: chartOptions
+                    });
+                    
+                } else {
+                    // Fallback message if Chart.js is not loaded
+                    ctx.font = "16px Arial";
+                    ctx.fillStyle = "#dc2626";
+                    ctx.textAlign = "center";
+                    ctx.fillText("Chart.js library not loaded", barChartCanvas.width/2, barChartCanvas.height/2);
                 }
             }
         });
@@ -369,10 +382,27 @@ while($row = $query->fetch_assoc()){
             
             if(barChartCanvas){
                 var ctx = barChartCanvas.getContext('2d');
-                ctx.font = "16px Arial";
-                ctx.fillStyle = "#666";
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, barChartCanvas.width, barChartCanvas.height);
+                
+                // Set styles for no data message
+                ctx.font = "18px 'Segoe UI', Arial, sans-serif";
+                ctx.fillStyle = "#6b7280";
                 ctx.textAlign = "center";
-                ctx.fillText("No votes cast yet for this position", barChartCanvas.width/2, barChartCanvas.height/2);
+                ctx.textBaseline = "middle";
+                
+                // Draw message
+                ctx.fillText("No votes cast yet for this position", 
+                    barChartCanvas.width/2, 
+                    barChartCanvas.height/2 - 10);
+                
+                // Draw icon or additional text
+                ctx.font = "14px 'Segoe UI', Arial, sans-serif";
+                ctx.fillStyle = "#9ca3af";
+                ctx.fillText("Votes will appear here once casting begins", 
+                    barChartCanvas.width/2, 
+                    barChartCanvas.height/2 + 20);
             }
         });
         </script>
@@ -387,7 +417,23 @@ $(window).on('load', function() {
     // Trigger resize for all charts
     setTimeout(function() {
         $(window).trigger('resize');
-    }, 100);
+        
+        // Force chart refresh if needed
+        if(typeof Chart !== 'undefined') {
+            Chart.helpers.each(Chart.instances, function(instance) {
+                instance.resize();
+            });
+        }
+    }, 500);
+});
+
+// Handle window resize
+$(window).on('resize', function() {
+    if(typeof Chart !== 'undefined') {
+        Chart.helpers.each(Chart.instances, function(instance) {
+            instance.resize();
+        });
+    }
 });
 </script>
 
@@ -427,6 +473,12 @@ $(window).on('load', function() {
     height: 300px;
     width: 100%;
   }
+  
+  /* Chart specific styles */
+  .chart canvas {
+    border-radius: 8px;
+  }
+  
   @media (max-width: 768px) {
     .content-header {
       margin: 10px !important;
@@ -488,6 +540,16 @@ $(window).on('load', function() {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  
+  /* Loading animation for charts */
+  @keyframes chartLoad {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .chart canvas {
+    animation: chartLoad 0.8s ease-out;
   }
 </style>
 
