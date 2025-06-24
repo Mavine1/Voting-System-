@@ -182,8 +182,8 @@ include 'includes/header.php';
                 </h4>
               </div>
               <div class="box-body" style="padding: 25px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
-                <div class="chart" style="position: relative;">
-                  <canvas id="<?= slugify($row['description']) ?>" style="height: 300px; width: 100%;"></canvas>
+                <div class="chart" style="position: relative; height: 300px;">
+                  <canvas id="<?= slugify($row['description']) ?>" style="width: 100%; height: 100%;"></canvas>
                 </div>
               </div>
             </div>
@@ -204,43 +204,64 @@ include 'includes/header.php';
 
 <?php include 'includes/scripts.php'; ?>
 
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <!-- Chart.js Scripts with Top 5 Candidates per Position -->
-<?php
-$query = $conn->query("SELECT * FROM positions ORDER BY priority ASC");
-while ($row = $query->fetch_assoc()) {
-    $positionId = (int)$row['id'];
-    $sqlCandidates = "
-        SELECT c.firstname, c.lastname, COUNT(v.id) AS vote_count
-        FROM candidates c
-        LEFT JOIN votes v ON v.candidate_id = c.id AND v.position_id = $positionId
-        WHERE c.position_id = $positionId
-        GROUP BY c.id
-        ORDER BY vote_count DESC
-        LIMIT 5
-    ";
-    $cquery = $conn->query($sqlCandidates);
-
-    $candidateNames = [];
-    $voteCounts = [];
-
-    while ($crow = $cquery->fetch_assoc()) {
-        $candidateNames[] = $crow['firstname'] . ' ' . $crow['lastname'];
-        $voteCounts[] = (int)$crow['vote_count'];
-    }
-
-    while (count($candidateNames) < 5) {
-        $candidateNames[] = 'No Candidate';
-        $voteCounts[] = 0;
-    }
-
-    $candidateNamesJson = json_encode($candidateNames);
-    $voteCountsJson = json_encode($voteCounts);
-    $canvasId = slugify($row['description']);
-    ?>
-    <script>
-        $(function() {
-            const ctx = document.getElementById('<?= $canvasId ?>').getContext('2d');
-            new Chart(ctx, {
+<script>
+$(document).ready(function() {
+    <?php
+    $query = $conn->query("SELECT * FROM positions ORDER BY priority ASC");
+    while ($row = $query->fetch_assoc()) {
+        $positionId = (int)$row['id'];
+        
+        // Get all candidates for this position with their vote counts
+        $sqlCandidates = "
+            SELECT 
+                c.id,
+                c.firstname, 
+                c.lastname, 
+                COALESCE(vote_counts.vote_count, 0) AS vote_count
+            FROM candidates c
+            LEFT JOIN (
+                SELECT 
+                    candidate_id, 
+                    COUNT(*) AS vote_count
+                FROM votes 
+                WHERE position_id = $positionId
+                GROUP BY candidate_id
+            ) vote_counts ON c.id = vote_counts.candidate_id
+            WHERE c.position_id = $positionId
+            ORDER BY vote_count DESC, c.firstname ASC
+            LIMIT 5
+        ";
+        
+        $cquery = $conn->query($sqlCandidates);
+        
+        $candidateNames = [];
+        $voteCounts = [];
+        
+        // Get actual candidates with their vote counts
+        while ($crow = $cquery->fetch_assoc()) {
+            $candidateNames[] = $crow['firstname'] . ' ' . $crow['lastname'];
+            $voteCounts[] = (int)$crow['vote_count'];
+        }
+        
+        // If we have less than 5 candidates, fill with "No Candidate" entries
+        while (count($candidateNames) < 5) {
+            $candidateNames[] = 'No Candidate';
+            $voteCounts[] = 0;
+        }
+        
+        $candidateNamesJson = json_encode($candidateNames);
+        $voteCountsJson = json_encode($voteCounts);
+        $canvasId = slugify($row['description']);
+        ?>
+        
+        // Chart for <?= htmlspecialchars($row['description']) ?>
+        const ctx<?= $canvasId ?> = document.getElementById('<?= $canvasId ?>');
+        if (ctx<?= $canvasId ?>) {
+            new Chart(ctx<?= $canvasId ?>, {
                 type: 'bar',
                 data: {
                     labels: <?= $candidateNamesJson ?>,
@@ -271,7 +292,9 @@ while ($row = $query->fetch_assoc()) {
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: false 
+                        },
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: 'white',
@@ -282,7 +305,7 @@ while ($row = $query->fetch_assoc()) {
                             displayColors: true,
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.x + ' votes';
+                                    return 'Votes: ' + context.parsed.x;
                                 }
                             }
                         }
@@ -296,14 +319,21 @@ while ($row = $query->fetch_assoc()) {
                             },
                             ticks: {
                                 color: '#374151',
-                                font: { weight: '600' }
+                                font: { 
+                                    weight: '600' 
+                                },
+                                stepSize: 1
                             }
                         },
                         y: {
-                            grid: { display: false },
+                            grid: { 
+                                display: false 
+                            },
                             ticks: {
                                 color: '#374151',
-                                font: { weight: '600' },
+                                font: { 
+                                    weight: '600' 
+                                },
                                 callback: function(value) {
                                     const label = this.getLabelForValue(value);
                                     return label.length > 15 ? label.substr(0, 15) + '...' : label;
@@ -311,17 +341,21 @@ while ($row = $query->fetch_assoc()) {
                             }
                         }
                     },
-                    animation: { duration: 1500, easing: 'easeInOutQuart' }
+                    animation: { 
+                        duration: 1500, 
+                        easing: 'easeInOutQuart' 
+                    }
                 }
             });
-        });
-    </script>
-<?php
-}
-?>
+        }
+        
+    <?php
+    }
+    ?>
+});
+</script>
 
 <style>
-  /* Existing styling here (unchanged) */
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -352,6 +386,11 @@ while ($row = $query->fetch_assoc()) {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
   }
+  .chart {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
   @media (max-width: 768px) {
     .content-header {
       margin: 10px !important;
@@ -369,7 +408,7 @@ while ($row = $query->fetch_assoc()) {
     .box-body {
       padding: 15px !important;
     }
-    canvas {
+    .chart {
       height: 250px !important;
     }
   }
@@ -388,6 +427,9 @@ while ($row = $query->fetch_assoc()) {
     }
     .box-title {
       font-size: 16px !important;
+    }
+    .chart {
+      height: 200px !important;
     }
   }
   @keyframes bounce {
