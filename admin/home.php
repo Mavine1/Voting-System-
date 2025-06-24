@@ -210,49 +210,40 @@ include 'includes/header.php';
 <script>
 // Chart color palette
 const chartColors = [
-    'rgba(30, 64, 175, 0.8)',    // Blue
-    'rgba(220, 38, 38, 0.8)',    // Red  
-    'rgba(5, 150, 105, 0.8)',    // Green
-    'rgba(124, 58, 237, 0.8)',   // Purple
-    'rgba(245, 158, 11, 0.8)',   // Yellow
-    'rgba(8, 145, 178, 0.8)',    // Cyan
-    'rgba(124, 45, 18, 0.8)',    // Brown
-    'rgba(134, 25, 143, 0.8)'    // Pink
+    'rgba(59, 130, 246, 0.9)',   // Blue gradient
+    'rgba(16, 185, 129, 0.9)',   // Green gradient  
+    'rgba(168, 85, 247, 0.9)',   // Purple gradient
+    'rgba(239, 68, 68, 0.9)',    // Red gradient
+    'rgba(245, 158, 11, 0.9)',   // Yellow/amber
+    'rgba(8, 145, 178, 0.9)',    // Cyan
+    'rgba(139, 69, 19, 0.9)',    // Brown
+    'rgba(219, 39, 119, 0.9)'    // Pink
 ];
 
 const borderColors = [
-    'rgba(30, 64, 175, 1)',
-    'rgba(220, 38, 38, 1)',
-    'rgba(5, 150, 105, 1)',
-    'rgba(124, 58, 237, 1)',
-    'rgba(245, 158, 11, 1)',
-    'rgba(8, 145, 178, 1)',
-    'rgba(124, 45, 18, 1)',
-    'rgba(134, 25, 143, 1)'
+    '#3b82f6', '#10b981', '#a855f7', '#ef4444',
+    '#f59e0b', '#0891b2', '#8b4513', '#db2777'
 ];
 
-// Chart configuration object
 const chartDefaults = {
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: 'y', // Horizontal bars
+    indexAxis: 'y',
     plugins: {
-        legend: {
-            display: false
-        },
+        legend: { display: false },
         tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: 'white',
-            bodyColor: 'white',
-            borderColor: 'rgba(59, 130, 246, 1)',
+            backgroundColor: 'rgba(30, 41, 59, 0.95)',
+            titleColor: '#f8fafc',
+            bodyColor: '#e2e8f0',
+            borderColor: '#3b82f6',
             borderWidth: 2,
-            cornerRadius: 8,
-            displayColors: false,
+            cornerRadius: 12,
+            padding: 12,
+            displayColors: true,
+            usePointStyle: true,
             callbacks: {
-                title: function(context) {
-                    return context[0].label;
-                },
-                label: function(context) {
+                title: (context) => context[0].label,
+                label: (context) => {
                     const value = context.parsed.x;
                     const total = context.chart.data.total;
                     const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
@@ -265,68 +256,107 @@ const chartDefaults = {
         x: {
             beginAtZero: true,
             grid: {
-                color: 'rgba(0, 0, 0, 0.1)',
+                color: 'rgba(148, 163, 184, 0.3)',
                 drawBorder: false
             },
             ticks: {
-                color: '#374151',
-                font: { 
-                    weight: '600',
-                    size: 12
-                },
+                color: '#475569',
+                font: { weight: '600', size: 11 },
                 stepSize: 1,
-                callback: function(value) {
-                    return Number.isInteger(value) ? value : '';
-                }
+                callback: (value) => Number.isInteger(value) ? value : ''
             },
             title: {
                 display: true,
-                text: 'Number of Votes',
+                text: 'Votes',
                 color: '#1e40af',
-                font: { 
-                    weight: 'bold', 
-                    size: 14 
-                }
+                font: { weight: 'bold', size: 13 }
             }
         },
         y: {
-            grid: { 
-                display: false 
-            },
+            grid: { display: false },
             ticks: {
-                color: '#374151',
-                font: { 
-                    weight: '600',
-                    size: 11
-                },
+                color: '#475569',
+                font: { weight: '600', size: 10 },
                 callback: function(value) {
                     const label = this.getLabelForValue(value);
-                    // Truncate long names
-                    return label.length > 18 ? label.substr(0, 18) + '...' : label;
-                }
-            },
-            title: {
-                display: true,
-                text: 'Candidates',
-                color: '#1e40af',
-                font: { 
-                    weight: 'bold', 
-                    size: 14 
+                    return label.length > 15 ? label.substr(0, 15) + '...' : label;
                 }
             }
         }
     },
     animation: {
-        duration: 1500,
-        easing: 'easeInOutQuart'
+        duration: 1200,
+        easing: 'easeOutQuart'
     },
     elements: {
         bar: {
-            borderRadius: 6,
+            borderRadius: 8,
             borderSkipped: false
         }
     }
 };
+
+function createChart(canvasId, labels, data, positionName) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const totalVotes = data.reduce((sum, current) => sum + current, 0);
+    
+    // Create gradient backgrounds
+    const gradients = [];
+    for(let i = 0; i < data.length; i++) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        const colorIndex = i % chartColors.length;
+        gradient.addColorStop(0, chartColors[colorIndex]);
+        gradient.addColorStop(1, chartColors[colorIndex].replace('0.9', '0.7'));
+        gradients.push(gradient);
+    }
+    
+    const chartData = {
+        labels: labels,
+        datasets: [{
+            label: 'Votes',
+            data: data,
+            backgroundColor: gradients,
+            borderColor: borderColors.slice(0, data.length),
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false
+        }],
+        total: totalVotes
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: chartDefaults
+    });
+}
+
+function showNoDataMessage(canvasId, positionName) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Create gradient for text
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, '#64748b');
+    gradient.addColorStop(1, '#94a3b8');
+    
+    ctx.font = "bold 16px 'Segoe UI'";
+    ctx.fillStyle = gradient;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    
+    ctx.fillText("No votes yet", canvas.width/2, canvas.height/2 - 10);
+    
+    ctx.font = "12px 'Segoe UI'";
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillText(`Charts appear when voting begins`, canvas.width/2, canvas.height/2 + 15);
+}
 
 // Function to create chart
 function createChart(canvasId, labels, data, positionName) {
