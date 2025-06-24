@@ -168,9 +168,21 @@ include 'includes/header.php';
       $sql = "SELECT * FROM positions ORDER BY priority ASC";
       $query = $conn->query($sql);
       $inc = 2;
+      $hasData = false;
+      
       while ($row = $query->fetch_assoc()) {
           $inc = ($inc == 2) ? 1 : $inc + 1;
           if ($inc == 1) echo "<div class='row' style='margin-bottom: 30px;'>";
+          
+          // Check if this position has any votes or candidates
+          $positionId = (int)$row['id'];
+          $checkDataQuery = "SELECT COUNT(*) as total FROM candidates WHERE position_id = $positionId";
+          $dataCheck = $conn->query($checkDataQuery);
+          $candidateCount = $dataCheck->fetch_assoc()['total'] ?? 0;
+          
+          if ($candidateCount > 0) {
+              $hasData = true;
+          }
           ?>
           <div class="col-sm-6" style="margin-bottom: 20px;">
             <div class="box" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none;">
@@ -182,9 +194,17 @@ include 'includes/header.php';
                 </h4>
               </div>
               <div class="box-body" style="padding: 25px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
-                <div class="chart" style="position: relative;">
-                  <canvas id="<?= slugify($row['description']) ?>" style="height: 300px; width: 100%;"></canvas>
-                </div>
+                <?php if ($candidateCount == 0): ?>
+                  <div class="no-data-message" style="text-align: center; padding: 60px 20px; color: #6b7280;">
+                    <i class="fa fa-exclamation-circle" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
+                    <h4 style="color: #374151; font-weight: 600; margin-bottom: 10px;">No Candidates Available</h4>
+                    <p style="color: #6b7280; margin: 0;">Please add candidates for this position to view the voting results.</p>
+                  </div>
+                <?php else: ?>
+                  <div class="chart" style="position: relative;">
+                    <canvas id="<?= slugify($row['description']) ?>" style="height: 300px; width: 100%;"></canvas>
+                  </div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -192,7 +212,27 @@ include 'includes/header.php';
           if ($inc == 2) echo "</div>";
       }
       if ($inc == 1) echo "<div class='col-sm-6'></div></div>";
-      ?>
+      
+      // Show overall message if no data exists
+      if (!$hasData): ?>
+        <div class="row" style="margin: 30px 0;">
+          <div class="col-xs-12">
+            <div style="background: white; border-radius: 15px; padding: 40px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center;">
+              <i class="fa fa-chart-line" style="font-size: 64px; color: #d1d5db; margin-bottom: 20px;"></i>
+              <h3 style="color: #374151; font-weight: 700; margin-bottom: 15px;">No Election Data Available</h3>
+              <p style="color: #6b7280; font-size: 16px; margin-bottom: 25px;">Start by adding positions and candidates to see the voting results dashboard.</p>
+              <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="positions.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">
+                  <i class="fa fa-plus" style="margin-right: 8px;"></i> Add Positions
+                </a>
+                <a href="candidates.php" class="btn" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600;">
+                  <i class="fa fa-user-plus" style="margin-right: 8px;"></i> Add Candidates
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
 
     </section>
   </div>
@@ -204,124 +244,177 @@ include 'includes/header.php';
 
 <?php include 'includes/scripts.php'; ?>
 
-<!-- Chart.js Scripts with Top 5 Candidates per Position -->
+<!-- Chart.js Scripts with Enhanced Error Handling -->
 <?php
 $query = $conn->query("SELECT * FROM positions ORDER BY priority ASC");
 while ($row = $query->fetch_assoc()) {
     $positionId = (int)$row['id'];
+    
+    // Enhanced SQL query with better error handling
     $sqlCandidates = "
-        SELECT c.firstname, c.lastname, COUNT(v.id) AS vote_count
+        SELECT 
+            c.id,
+            c.firstname, 
+            c.lastname, 
+            COALESCE(COUNT(v.id), 0) AS vote_count
         FROM candidates c
-        LEFT JOIN votes v ON v.candidate_id = c.id AND v.position_id = $positionId
+        LEFT JOIN votes v ON v.candidate_id = c.id
         WHERE c.position_id = $positionId
-        GROUP BY c.id
-        ORDER BY vote_count DESC
+        GROUP BY c.id, c.firstname, c.lastname
+        ORDER BY vote_count DESC, c.lastname ASC
         LIMIT 5
     ";
+    
     $cquery = $conn->query($sqlCandidates);
+    
+    if (!$cquery) {
+        // Handle SQL error
+        error_log("SQL Error in dashboard: " . $conn->error);
+        continue;
+    }
 
     $candidateNames = [];
     $voteCounts = [];
+    $hasRealData = false;
 
     while ($crow = $cquery->fetch_assoc()) {
-        $candidateNames[] = $crow['firstname'] . ' ' . $crow['lastname'];
-        $voteCounts[] = (int)$crow['vote_count'];
+        $candidateNames[] = htmlspecialchars($crow['firstname'] . ' ' . $crow['lastname']);
+        $voteCount = (int)$crow['vote_count'];
+        $voteCounts[] = $voteCount;
+        if ($voteCount > 0) $hasRealData = true;
     }
 
-    while (count($candidateNames) < 5) {
-        $candidateNames[] = 'No Candidate';
-        $voteCounts[] = 0;
+    // Skip creating chart if no candidates exist
+    if (empty($candidateNames)) {
+        continue;
+    }
+
+    // Fill remaining slots with sample data for better visualization when no votes exist
+    while (count($candidateNames) < 5 && count($candidateNames) < 5) {
+        break; // Don't add fake candidates, just work with what we have
     }
 
     $candidateNamesJson = json_encode($candidateNames);
     $voteCountsJson = json_encode($voteCounts);
     $canvasId = slugify($row['description']);
-    ?>
+    
+    // Only generate chart if we have candidates
+    if (!empty($candidateNames)): ?>
     <script>
         $(function() {
-            const ctx = document.getElementById('<?= $canvasId ?>').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: <?= $candidateNamesJson ?>,
-                    datasets: [{
-                        label: 'Votes',
-                        data: <?= $voteCountsJson ?>,
-                        backgroundColor: [
-                            'rgba(30, 64, 175, 0.8)',
-                            'rgba(220, 38, 38, 0.8)',
-                            'rgba(5, 150, 105, 0.8)',
-                            'rgba(124, 58, 237, 0.8)',
-                            'rgba(245, 158, 11, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(30, 64, 175, 1)',
-                            'rgba(220, 38, 38, 1)',
-                            'rgba(5, 150, 105, 1)',
-                            'rgba(124, 58, 237, 1)',
-                            'rgba(245, 158, 11, 1)'
-                        ],
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: 'white',
-                            bodyColor: 'white',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.x + ' votes';
-                                }
-                            }
-                        }
+            const ctx = document.getElementById('<?= $canvasId ?>');
+            if (!ctx) return; // Skip if canvas doesn't exist
+            
+            try {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: <?= $candidateNamesJson ?>,
+                        datasets: [{
+                            label: 'Votes',
+                            data: <?= $voteCountsJson ?>,
+                            backgroundColor: [
+                                'rgba(30, 64, 175, 0.8)',
+                                'rgba(220, 38, 38, 0.8)',
+                                'rgba(5, 150, 105, 0.8)',
+                                'rgba(124, 58, 237, 0.8)',
+                                'rgba(245, 158, 11, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(30, 64, 175, 1)',
+                                'rgba(220, 38, 38, 1)',
+                                'rgba(5, 150, 105, 1)',
+                                'rgba(124, 58, 237, 1)',
+                                'rgba(245, 158, 11, 1)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
                     },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)',
-                                borderColor: 'rgba(0, 0, 0, 0.2)'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { 
+                                display: false 
                             },
-                            ticks: {
-                                color: '#374151',
-                                font: { weight: '600' }
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        const votes = context.parsed.x;
+                                        const percentage = <?= $hasRealData ? 'true' : 'false' ?> && context.dataset.data.reduce((a, b) => a + b, 0) > 0 
+                                            ? ((votes / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1) + '%'
+                                            : '';
+                                        return context.dataset.label + ': ' + votes + ' votes' + (percentage ? ' (' + percentage + ')' : '');
+                                    },
+                                    title: function(context) {
+                                        return context[0].label;
+                                    }
+                                }
                             }
                         },
-                        y: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#374151',
-                                font: { weight: '600' },
-                                callback: function(value) {
-                                    const label = this.getLabelForValue(value);
-                                    return label.length > 15 ? label.substr(0, 15) + '...' : label;
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)',
+                                    borderColor: 'rgba(0, 0, 0, 0.2)'
+                                },
+                                ticks: {
+                                    color: '#374151',
+                                    font: { weight: '600' },
+                                    stepSize: 1
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Votes',
+                                    color: '#374151',
+                                    font: { weight: '600' }
+                                }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: '#374151',
+                                    font: { weight: '600' },
+                                    callback: function(value) {
+                                        const label = this.getLabelForValue(value);
+                                        return label.length > 20 ? label.substr(0, 20) + '...' : label;
+                                    }
                                 }
                             }
+                        },
+                        animation: { 
+                            duration: 1500, 
+                            easing: 'easeInOutQuart' 
                         }
-                    },
-                    animation: { duration: 1500, easing: 'easeInOutQuart' }
-                }
-            });
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating chart for <?= $canvasId ?>:', error);
+                // Show fallback message
+                document.getElementById('<?= $canvasId ?>').parentNode.innerHTML = 
+                    '<div style="text-align: center; padding: 40px; color: #6b7280;">' +
+                    '<i class="fa fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 15px;"></i>' +
+                    '<p>Unable to load chart data</p>' +
+                    '</div>';
+            }
         });
     </script>
-<?php
+    <?php endif;
 }
 ?>
 
 <style>
-  /* Existing styling here (unchanged) */
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -351,6 +444,11 @@ while ($row = $query->fetch_assoc()) {
   .box:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+  }
+  .no-data-message {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: 12px;
+    border: 2px dashed #d1d5db;
   }
   @media (max-width: 768px) {
     .content-header {
@@ -411,7 +509,131 @@ while ($row = $query->fetch_assoc()) {
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-</style>
-
-</body>
-</html>
+  
+  /* Chart container improvements */
+  .chart {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .empty-state i {
+    font-size: 48px;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+    display: block;
+  }
+  
+  .empty-state h4 {
+    color: #475569;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  
+  .empty-state p {
+    color: #64748b;
+    margin: 0;
+    font-size: 14px;
+  }
+  
+  /* Loading animation for charts */
+  .chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    flex-direction: column;
+  }
+  
+  .chart-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Improved button styles */
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  
+  .action-buttons .btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  
+  /* Card hover effects */
+  .stats-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .stats-card:hover::before {
+    left: 100%;
+  }
+  
+  /* Responsive improvements */
+  @media (max-width: 576px) {
+    .action-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .action-buttons .btn {
+      width: 200px;
+      max-width: 100%;
+    }
+    
+    .empty-state {
+      padding: 30px 15px;
+    }
+    
+    .empty-state i {
+      font-size: 36px;
+    }
+    
+    .empty-state h4 {
+      font-size: 16px;
+    }
+  }
